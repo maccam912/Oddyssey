@@ -3,6 +3,9 @@ import random
 from PYGUSES.pyguses.curses import Flicker
 from PYGUSES.pyguses.form import Hline, Frame
 
+class Menu():
+    pass
+
 class MainMenu():
     def __init__(self, curses, width, height, select_dict={0 : 'Demo', 1 : 'Quit'}):
         self.curses = curses
@@ -35,7 +38,7 @@ class MainMenu():
         self.key_block = True
         self.enable = True
         self.mouse_pos = (0, 0)
-        self.mouse_effect = {}
+        self.is_mouse_recorded = False
     
     def draw_background(self):
         # Draw background
@@ -66,14 +69,7 @@ class MainMenu():
         flag = None
         
         # Mouse event
-        if len(self.mouse_effect) != 0:
-            self.curses.set_cell(self.mouse_pos[0], self.mouse_pos[1], self.mouse_effect)
-        
-        self.mouse_pos = self.curses.get_mouse_pos()
-        self.mouse_effect = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
-        
-        self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1])['foreground'] = 'maroon'
-        self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1])['background'] = 'yellow'
+        self.update_mouse()
         
         # Keyboard events
         if event.type == pygame.KEYDOWN:
@@ -131,3 +127,21 @@ class MainMenu():
     def select(self):
         self.enable = False
         return self.select_dict[self.sel_ind]
+    
+    def update_mouse(self):
+        # Mouse event
+        self.mouse_pos = self.curses.get_mouse_pos()        
+        if not self.is_mouse_recorded:
+            self.mouse_temp_pos = self.mouse_pos
+            self.mouse_temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
+            self.is_mouse_recorded = True
+            
+        if self.mouse_pos != self.mouse_temp_pos:
+            self.curses.set_cell(self.mouse_temp_pos[0], self.mouse_temp_pos[1], self.mouse_temp)
+            self.mouse_temp_pos = self.mouse_pos
+            self.mouse_temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
+        
+        temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
+        temp['foreground'] = 'maroon'
+        temp['background'] = 'yellow'
+        self.curses.set_cell(self.mouse_pos[0], self.mouse_pos[1], temp)
