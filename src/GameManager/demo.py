@@ -1,5 +1,5 @@
 import pygame
-from PYGUSES.pygesus.form import Hline, Frame
+from PYGUSES.pyguses.form import Hline, Frame
 
 class Demo():
     
@@ -70,4 +70,4 @@ class Demo():
         message = ''.join(CL)
         self.curses.put_message(0, 1, message)        
         self.curses.put_message(1, 9, 'abcdefghijklmnopqrstuvwxyz' ,auto=True, align='left', box_x=1,box_y=8, box_width=8, box_height=6)
-        
+    

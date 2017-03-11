@@ -1,7 +1,7 @@
 import pygame
 import random
-from PYGUSES.pygesus.curses import Flicker
-from PYGUSES.pygesus.form import Hline, Frame
+from PYGUSES.pyguses.curses import Flicker
+from PYGUSES.pyguses.form import Hline, Frame
 
 class MainMenu():
     def __init__(self, curses, width, height, select_dict={0 : 'Demo', 1 : 'Quit'}):

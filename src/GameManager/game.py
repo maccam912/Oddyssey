@@ -3,7 +3,7 @@ import os
 import pygame
 import configparser
 
-from PYGUSES.pygesus.curses import Curses
+from PYGUSES.pyguses.curses import Curses
 from GameManager.menu import MainMenu
 from GameManager.demo import Demo
 from GameManager.adventure import Adventure

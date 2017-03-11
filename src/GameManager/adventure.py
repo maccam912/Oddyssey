@@ -1,3 +1,5 @@
+from PYGUSES.pyguses.form import Rect
+
 class Adventure():
     
     def __init__(self, curses):
@@ -12,6 +14,9 @@ class Adventure():
     
     def init(self):
         # Initial setting
+        Rect(10, 10, 15, 10, self.curses, is_filled=False, char='/solid', foreground='white', background='trans')
+        Rect(11, 11, 13, 8, self.curses, is_filled=True, char='/brick', foreground='gray', background='trans')
+        self.curses.put_char(11,11, char='/face', foreground='yellow', background='trans')
         
         # Set control flag
         self.is_init = True
