@@ -47,7 +47,8 @@ class Game():
         # Game initialization
         self.curses = Curses(self.screen_width, self.screen_height, 'black')
         self.select_dict = {0 : 'A New Adventure', 1 : 'Demo', 2 : 'Quit'}
-        self.menu = MainMenu(self.curses, 40, 20, self.select_dict)
+        menu_size = (40, 20)
+        self.menu = MainMenu(self.curses, int(self.curses.win_width/2 - menu_size[0]/2), int(self.curses.win_height/2 - menu_size[1]/2), menu_size[0], menu_size[1], self.select_dict, align='mid', flick_enable=True)
         self.demo = Demo(self.curses)
         self.adventure = Adventure(self.curses)
         
@@ -64,29 +65,30 @@ class Game():
             
             # Main Menu
             if self.menu.enable:
-                flag = self.menu.selection(event)
-                if flag == self.select_dict[2] or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+                flag = self.menu.update(event)
+                if flag == 'Quit' or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                     self.done = True
-                elif flag == self.select_dict[0]:
+                elif flag == 'A New Adventure':
                     self.curses.clear_window()
                     self.adventure.init()
-                elif flag == self.select_dict[1]:
+                elif flag == 'Demo':
                     self.curses.clear_window()
                     self.demo.init()
+            
             # Game
             if self.adventure.enable:
                 self.adventure.update(event)
             else:
                 # Diable demo and reactivate main menu
-                if not self.menu.enable and flag == self.select_dict[0]:
+                if not self.menu.enable and flag == 'A New Adventure':
                     self.menu.initialization()
-                    self.adventure.initialization()
+                    self.adventure.initialization()                    
             # Demo
             if self.demo.enable:
                 self.demo.update(event)
             else:
                 # Diable demo and reactivate main menu
-                if not self.menu.enable and flag == self.select_dict[1]:
+                if not self.menu.enable and flag == 'Demo':
                     self.menu.initialization()
                     self.demo.initialization()
                     
