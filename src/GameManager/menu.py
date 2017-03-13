@@ -5,10 +5,11 @@ from PYGUSES.pyguses.form import Hline, Frame
 
 class Menu():
     
-    def __init__(self, curses, x, y, width, height, select_dict, align='mid', flick_enable=True):
+    def __init__(self, curses, mouse_controller, x, y, width, height, select_dict, align='mid', flick_enable=True):
+        self.curses = curses
+        self.mouse_controller = mouse_controller
         self.x = x
         self.y = y
-        self.curses = curses
         self.width = width
         self.height = height
         self.select_dict = select_dict
@@ -16,14 +17,10 @@ class Menu():
         self.flick_enable = flick_enable
     
     def initialization(self):
-        pygame.mouse.set_visible(False)
-        
         self.sel_ind = 0
-        self.mouse_pos = (0, 0)
         self.window_center = (int(self.curses.win_width/2), int(self.curses.win_height/2))
         self.key_block = True
         self.enable = True
-        self.is_mouse_recorded = False
         
         self.draw_frame()
         self.draw_selection()
@@ -33,9 +30,9 @@ class Menu():
         
         
     def draw_frame(self, style=0, title=None):
-        if self.mouse_pos[0] >= self.x and self.mouse_pos[0] < self.x + self.width and self.mouse_pos[1] >= self.y and self.mouse_pos[1] < self.y + self.height:
-            self.curses.set_cell(self.mouse_pos[0], self.mouse_pos[1], self.mouse_temp)
-            self.is_mouse_recorded = False
+        if self.mouse_controller.mouse_pos[0] >= self.x and self.mouse_controller.mouse_pos[0] < self.x + self.width and self.mouse_controller.mouse_pos[1] >= self.y and self.mouse_controller.mouse_pos[1] < self.y + self.height:
+            self.curses.set_cell(self.mouse_controller.mouse_pos[0], self.mouse_controller.mouse_pos[1], self.mouse_controller.mouse_temp)
+            self.mouse_controller.is_mouse_recorded = False
         self.menu_sec = self.curses.get_cell_section(self.x, self.y, self.width, self.height).copy()
         # Draw menu frame
         Frame(self.x, self.y, self.width, self.height, self.curses, style=style, is_filled=True, char=' ', foreground='white', background='trans', frame_foreground='white', frame_background='trans')
@@ -45,8 +42,8 @@ class Menu():
     
     def exit_menu(self):
         self.curses.set_cell_section(self.x, self.y, self.menu_sec)
-        if self.mouse_pos[0] >= self.x and self.mouse_pos[0] < self.x + self.width and self.mouse_pos[1] >= self.y and self.mouse_pos[1] < self.y + self.height:
-            self.mouse_temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
+        if self.mouse_controller.mouse_pos[0] >= self.x and self.mouse_controller.mouse_pos[0] < self.x + self.width and self.mouse_controller.mouse_pos[1] >= self.y and self.mouse_controller.mouse_pos[1] < self.y + self.height:
+            self.mouse_controller.mouse_temp = self.curses.get_cell(self.mouse_controller.mouse_pos[0], self.mouse_controller.mouse_pos[1]).copy()
     
     def draw_selection(self, ind=None):
         if self.align == 'mid':
@@ -74,8 +71,6 @@ class Menu():
         self.curses.put_char(label_x + len(char_list), label_y, '/Left', 'white', 'trans')
     
     def update(self, event):
-        # Mouse event
-        self.update_mouse()
         # Keyboard event
         flag = self.update_keyboard(event)
         # Update flicker handler
@@ -83,24 +78,6 @@ class Menu():
             self.flicker.update()
         self.refresh_selected()        
         return flag
-        
-    def update_mouse(self):
-        # Mouse event
-        self.mouse_pos = self.curses.get_mouse_pos()        
-        if not self.is_mouse_recorded:
-            self.mouse_temp_pos = self.mouse_pos
-            self.mouse_temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
-            self.is_mouse_recorded = True
-            
-        if self.mouse_pos != self.mouse_temp_pos:
-            self.curses.set_cell(self.mouse_temp_pos[0], self.mouse_temp_pos[1], self.mouse_temp)
-            self.mouse_temp_pos = self.mouse_pos
-            self.mouse_temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
-        
-        temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
-        temp['foreground'] = 'maroon'
-        temp['background'] = 'yellow'
-        self.curses.set_cell(self.mouse_pos[0], self.mouse_pos[1], temp)
     
     def update_keyboard(self, event):
         flag = None
@@ -149,8 +126,8 @@ class Menu():
                 self.flicker.refresh(x, label_y)
             
 class MainMenu(Menu):
-    def __init__(self, curses, x, y, width, height, select_dict, align='mid', flick_enable=False):
-        super(MainMenu, self).__init__(curses, x, y, width, height, select_dict, align, flick_enable)
+    def __init__(self, curses, mouse_controller, x, y, width, height, select_dict, align='mid', flick_enable=False):
+        super(MainMenu, self).__init__(curses, mouse_controller, x, y, width, height, select_dict, align, flick_enable)
         self.initialization()
     
     def initialization(self):

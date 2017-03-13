@@ -1,11 +1,12 @@
 import pygame
-from PYGUSES.pyguses.form import Frame
+from PYGUSES.pyguses.form import Frame, Rect
 from GameManager.menu import Menu
 
 class Adventure():
     
-    def __init__(self, curses):
+    def __init__(self, curses, mouse_controller):
         self.curses = curses
+        self.mouse_controller = mouse_controller
         self.initialization()
     
     def initialization(self):
@@ -13,7 +14,6 @@ class Adventure():
         self.enable = False
         self.key_block = True
         self.timer_enable = False
-        self.is_mouse_recorded = False
     
     def init(self):
         # Initial setting
@@ -23,10 +23,14 @@ class Adventure():
         self.menu_init = False
         self.timer = 0
         
+        # Draw static area
+        Rect(0, 0, 50, 30,self.curses, is_filled=True, char='.', foreground='green', background='trans')
+                
+        
         # Exit menu
         self.select_dict = {0 : 'Exit to Main Menu', 1 : 'Exit Game'}
         self.menu_size = (40, 20)
-        self.menu = Menu(self.curses, int(self.curses.win_width/2 - self.menu_size[0]/2), int(self.curses.win_height/2 - self.menu_size[1]/2), self.menu_size[0], self.menu_size[1], self.select_dict, align='mid', flick_enable=True)
+        self.menu = Menu(self.curses, self.mouse_controller, int(self.curses.win_width/2 - self.menu_size[0]/2), int(self.curses.win_height/2 - self.menu_size[1]/2), self.menu_size[0], self.menu_size[1], self.select_dict, align='mid', flick_enable=True)
         
         # Draw UI
         bottom_h = 5
@@ -50,8 +54,7 @@ class Adventure():
             self.timer += 1
             message = '%04d' %self.timer
             self.curses.put_message(3, 0 , message[-4:], foreground='white', background='trans', auto=True, align='right', box_x=0, box_y=0, box_width=None, box_height=None)
-        # Mouse event
-        self.update_mouse()     
+
         # Keyboard events
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE and self.key_block:
@@ -59,7 +62,7 @@ class Adventure():
                 self.key_block = False
                 
             if event.key == pygame.K_SPACE and self.key_block:
-                if self.menu_enable:
+                if not self.menu_enable:
                     self.timer_enable = not self.timer_enable                
                 self.key_block = False
                 
@@ -95,21 +98,3 @@ class Adventure():
                 self.key_block = True
         
         return self.enable
-    
-    def update_mouse(self):
-        # Mouse event
-        self.mouse_pos = self.curses.get_mouse_pos()        
-        if not self.is_mouse_recorded:
-            self.mouse_temp_pos = self.mouse_pos
-            self.mouse_temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
-            self.is_mouse_recorded = True
-            
-        if self.mouse_pos != self.mouse_temp_pos:
-            self.curses.set_cell(self.mouse_temp_pos[0], self.mouse_temp_pos[1], self.mouse_temp)
-            self.mouse_temp_pos = self.mouse_pos
-            self.mouse_temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
-        
-        temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
-        temp['foreground'] = 'maroon'
-        temp['background'] = 'yellow'
-        self.curses.set_cell(self.mouse_pos[0], self.mouse_pos[1], temp)

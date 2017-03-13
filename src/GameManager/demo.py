@@ -11,7 +11,6 @@ class Demo():
         self.is_init = False
         self.enable = False
         self.key_block = True
-        self.is_mouse_recorded = False
     
     def init(self):
         # Draw Title
@@ -38,9 +37,7 @@ class Demo():
         self.is_init = True
         self.enable = True
     
-    def update(self, event):
-        # Mouse event
-        self.update_mouse()        
+    def update(self, event):     
         # Keyboard events
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_BACKSPACE  and self.key_block:
@@ -52,24 +49,6 @@ class Demo():
                 self.key_block = True
         
         return self.enable
-    
-    def update_mouse(self):
-        # Mouse event
-        self.mouse_pos = self.curses.get_mouse_pos()        
-        if not self.is_mouse_recorded:
-            self.mouse_temp_pos = self.mouse_pos
-            self.mouse_temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
-            self.is_mouse_recorded = True
-            
-        if self.mouse_pos != self.mouse_temp_pos:
-            self.curses.set_cell(self.mouse_temp_pos[0], self.mouse_temp_pos[1], self.mouse_temp)
-            self.mouse_temp_pos = self.mouse_pos
-            self.mouse_temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
-        
-        temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
-        temp['foreground'] = 'maroon'
-        temp['background'] = 'yellow'
-        self.curses.set_cell(self.mouse_pos[0], self.mouse_pos[1], temp)
         
     def show_character_sheet(self):
         CL=[]
