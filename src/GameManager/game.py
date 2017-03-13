@@ -7,7 +7,7 @@ from PYGUSES.pyguses.curses import Curses
 from GameManager.menu import MainMenu
 from GameManager.demo import Demo
 from GameManager.adventure import Adventure
-from GameManager.controller import MouseController
+from GameManager.controller import MouseController, KeyboardController
 
 # system setting
 os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -50,13 +50,14 @@ class Game():
         
         self.curses = Curses(self.screen_width, self.screen_height, 'black')
         self.m_controller = MouseController(self.curses)
+        self.k_controller = KeyboardController(self.curses)
         
         self.select_dict = {0 : 'A New Adventure', 1 : 'Demo', 2 : 'Quit'}
         menu_size = (40, 20)
-        self.menu = MainMenu(self.curses, self.m_controller, int(self.curses.win_width/2 - menu_size[0]/2), int(self.curses.win_height/2 - menu_size[1]/2), menu_size[0], menu_size[1], self.select_dict, align='mid', flick_enable=True)
+        self.menu = MainMenu(self.curses, self.m_controller, self.k_controller, int(self.curses.win_width/2 - menu_size[0]/2), int(self.curses.win_height/2 - menu_size[1]/2), menu_size[0], menu_size[1], self.select_dict, align='mid', flick_enable=True)
         
-        self.demo = Demo(self.curses)        
-        self.adventure = Adventure(self.curses, self.m_controller)
+        self.demo = Demo(self.curses, self.k_controller)        
+        self.adventure = Adventure(self.curses, self.m_controller, self.k_controller)
         
     def run(self):
          
@@ -68,20 +69,27 @@ class Game():
             
             t0 = time.time()
             # --- Game logic should go here
+            # Display mouse cursor
+            self.m_controller.update()
+            # Keyboard control
+            self.k_controller.update(event)
             
             # Main Menu
             if self.menu.enable:
-                flag = self.menu.update(event)
-                if flag == 'Quit' or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
-                    self.done = True
-                elif flag == 'A New Adventure':
-                    self.curses.clear_window()
-                    self.adventure.init()
-                    self.m_controller.initialization()
-                elif flag == 'Demo':
-                    self.curses.clear_window()
-                    self.demo.init()
-                    self.m_controller.initialization()
+                flag = self.menu.update()
+                if self.k_controller.pressed != None:
+                    if flag == 'Quit' or self.k_controller.pressed[pygame.K_ESCAPE]:
+                        self.done = True
+                    elif flag == 'A New Adventure':
+                        self.curses.clear_window()
+                        self.adventure.init()
+                        self.m_controller.initialization()
+                        self.k_controller.initialization()
+                    elif flag == 'Demo':
+                        self.curses.clear_window()
+                        self.demo.init()
+                        self.m_controller.initialization()
+                        self.k_controller.initialization()
             # Game
             if self.adventure.enable:
                 self.adventure.update(event)
@@ -91,19 +99,17 @@ class Game():
                     self.menu.initialization()
                     self.adventure.initialization()   
                     self.m_controller.initialization()
+
             # Demo
             if self.demo.enable:
-                self.demo.update(event)
+                self.demo.update()
             else:
                 # Diable demo and reactivate main menu
                 if not self.menu.enable and flag == 'Demo':
                     self.menu.initialization()
                     self.demo.initialization()
                     self.m_controller.initialization()
-            
-            # Display mouse cursor
-            self.m_controller.update()
-            
+                        
             # Curses display
             self.screen.blit(self.curses.background, (0, 0))            
             self.screen.blit(self.curses.get_window_surface(), (0, 0))

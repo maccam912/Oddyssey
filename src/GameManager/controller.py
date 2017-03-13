@@ -1,3 +1,5 @@
+import pygame
+
 class Controller():
     def __init__(self, curses, enable=True, is_blocked=True):
         self.curses = curses
@@ -44,4 +46,26 @@ class MouseController(Controller):
         self.curses.set_cell(self.mouse_pos[0], self.mouse_pos[1], temp)
 
 class KeyboardController(Controller):
-    pass
+    def __init__(self, curses, enable=True, is_blocked=True):
+        super(KeyboardController, self).__init__(curses, enable, is_blocked)
+        self.initialization()
+        
+    def initialization(self):
+        self.key_blocked = True
+    
+    def update(self, event):
+        if self.enable:
+            self.update_keyboard(event)
+    
+    def update_keyboard(self, event):  
+        self.pressed = None
+        if self.is_blocked:            
+            if event.type == pygame.KEYDOWN and self.key_blocked:
+                self.pressed = pygame.key.get_pressed()
+                self.key_blocked = False
+            
+            if event.type == pygame.KEYUP:
+                self.key_blocked = True
+        else:
+            if event.type == pygame.KEYDOWN:
+                self.pressed = pygame.key.get_pressed()                

@@ -4,15 +4,15 @@ from GameManager.menu import Menu
 
 class Adventure():
     
-    def __init__(self, curses, mouse_controller):
+    def __init__(self, curses, mouse_controller, keyboard_controller):
         self.curses = curses
         self.mouse_controller = mouse_controller
+        self.keyboard_controller = keyboard_controller
         self.initialization()
     
     def initialization(self):
         self.is_init = False
         self.enable = False
-        self.key_block = True
         self.timer_enable = False
     
     def init(self):
@@ -30,7 +30,7 @@ class Adventure():
         # Exit menu
         self.select_dict = {0 : 'Exit to Main Menu', 1 : 'Exit Game'}
         self.menu_size = (40, 20)
-        self.menu = Menu(self.curses, self.mouse_controller, int(self.curses.win_width/2 - self.menu_size[0]/2), int(self.curses.win_height/2 - self.menu_size[1]/2), self.menu_size[0], self.menu_size[1], self.select_dict, align='mid', flick_enable=True)
+        self.menu = Menu(self.curses, self.mouse_controller, self.keyboard_controller, int(self.curses.win_width/2 - self.menu_size[0]/2), int(self.curses.win_height/2 - self.menu_size[1]/2), self.menu_size[0], self.menu_size[1], self.select_dict, align='mid', flick_enable=True)
         
         # Draw UI
         bottom_h = 5
@@ -48,20 +48,18 @@ class Adventure():
     
     def update(self, event):
         # Gameloop
-        if self.timer_enable:
-                
+        if self.timer_enable:                
             # Draw counter
             self.timer += 1
             message = '%04d' %self.timer
             self.curses.put_message(3, 0 , message[-4:], foreground='white', background='trans', auto=True, align='right', box_x=0, box_y=0, box_width=None, box_height=None)
 
         # Keyboard events
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE and self.key_block:
+        if self.keyboard_controller.pressed != None:
+            if self.keyboard_controller.pressed[pygame.K_ESCAPE]:
                 self.menu_enable = not self.menu_enable
-                self.key_block = False
                 
-            if event.key == pygame.K_SPACE and self.key_block:
+            if self.keyboard_controller.pressed[pygame.K_SPACE]:
                 if not self.menu_enable:
                     self.timer_enable = not self.timer_enable                
                 self.key_block = False
@@ -72,7 +70,7 @@ class Adventure():
             if not self.menu_init:
                 self.menu.initialization()
                 self.menu_init = True
-            flag = self.menu.update(event)
+            flag = self.menu.update()
             if flag == 'Exit to Main Menu':
                 self.enable = False
             elif flag == 'Exit Game':
@@ -90,11 +88,6 @@ class Adventure():
             self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, '/2Hbar'*len(message), foreground='teal', background='trans', auto=True, align='right')
         else:
             self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, message, foreground='white', background='trans', auto=True, align='right')
-        
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_ESCAPE:
-                self.key_block = True
-            if event.key == pygame.K_SPACE:
-                self.key_block = True
+
         
         return self.enable

@@ -5,9 +5,10 @@ from PYGUSES.pyguses.form import Hline, Frame
 
 class Menu():
     
-    def __init__(self, curses, mouse_controller, x, y, width, height, select_dict, align='mid', flick_enable=True):
+    def __init__(self, curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align='mid', flick_enable=True):
         self.curses = curses
         self.mouse_controller = mouse_controller
+        self.keyboard_controller = keyboard_controller
         self.x = x
         self.y = y
         self.width = width
@@ -19,7 +20,6 @@ class Menu():
     def initialization(self):
         self.sel_ind = 0
         self.window_center = (int(self.curses.win_width/2), int(self.curses.win_height/2))
-        self.key_block = True
         self.enable = True
         
         self.draw_frame()
@@ -70,41 +70,30 @@ class Menu():
         self.curses.put_char(label_x -1, label_y, '/Right', 'white', 'trans')
         self.curses.put_char(label_x + len(char_list), label_y, '/Left', 'white', 'trans')
     
-    def update(self, event):
+    def update(self):
         # Keyboard event
-        flag = self.update_keyboard(event)
+        flag = self.update_keyboard()
         # Update flicker handler
         if self.flick_enable:
             self.flicker.update()
         self.refresh_selected()        
         return flag
     
-    def update_keyboard(self, event):
+    def update_keyboard(self):
         flag = None
-        if event.type == pygame.KEYDOWN:
-            if (event.key == pygame.K_w or event.key == pygame.K_UP) and self.key_block:
+        if self.keyboard_controller.pressed != None:
+            if self.keyboard_controller.pressed[pygame.K_w] or self.keyboard_controller.pressed[pygame.K_UP]:
                 self.draw_selection(ind=self.sel_ind)
                 self.sel_ind -= 1
                 self.sel_ind %= len(self.select_dict.keys())
                 self.draw_select_indicator()
-                self.key_block = False
-            if (event.key == pygame.K_x or event.key == pygame.K_DOWN) and self.key_block :
+            if self.keyboard_controller.pressed[pygame.K_x] or self.keyboard_controller.pressed[pygame.K_DOWN]:
                 self.draw_selection(ind=self.sel_ind)
                 self.sel_ind += 1
                 self.sel_ind %= len(self.select_dict.keys())
                 self.draw_select_indicator()
-                self.key_block = False
-            if (event.key == pygame.K_s  or event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN) and self.key_block :
+            if self.keyboard_controller.pressed[pygame.K_s] or self.keyboard_controller.pressed[ pygame.K_KP_ENTER] or self.keyboard_controller.pressed[ pygame.K_RETURN]:
                 flag = self.select()
-                self.key_block = False
-                
-        if event.type == pygame.KEYUP:
-            if (event.key == pygame.K_w or event.key == pygame.K_UP):
-                self.key_block = True
-            if (event.key == pygame.K_x or event.key == pygame.K_DOWN):
-                self.key_block = True
-            if (event.key == pygame.K_s  or event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN):
-                self.key_block = True
         return flag
     
     def select(self):
@@ -126,8 +115,8 @@ class Menu():
                 self.flicker.refresh(x, label_y)
             
 class MainMenu(Menu):
-    def __init__(self, curses, mouse_controller, x, y, width, height, select_dict, align='mid', flick_enable=False):
-        super(MainMenu, self).__init__(curses, mouse_controller, x, y, width, height, select_dict, align, flick_enable)
+    def __init__(self, curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align='mid', flick_enable=False):
+        super(MainMenu, self).__init__(curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align, flick_enable)
         self.initialization()
     
     def initialization(self):

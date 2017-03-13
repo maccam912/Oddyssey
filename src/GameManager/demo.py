@@ -3,14 +3,14 @@ from PYGUSES.pyguses.form import Hline, Frame
 
 class Demo():
     
-    def __init__(self, curses):
+    def __init__(self, curses, keyboard_controller):
         self.curses = curses
+        self.keyboard_controller = keyboard_controller
         self.initialization()
     
     def initialization(self):
         self.is_init = False
         self.enable = False
-        self.key_block = True
     
     def init(self):
         # Draw Title
@@ -37,18 +37,11 @@ class Demo():
         self.is_init = True
         self.enable = True
     
-    def update(self, event):     
+    def update(self):        
         # Keyboard events
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_BACKSPACE  and self.key_block:
+        if self.keyboard_controller.pressed != None:
+            if self.keyboard_controller.pressed[pygame.K_BACKSPACE]:
                 self.enable = False
-                self.key_block = False
-                
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_BACKSPACE:
-                self.key_block = True
-        
-        return self.enable
         
     def show_character_sheet(self):
         CL=[]
