@@ -6,7 +6,7 @@ import configparser
 from PYGUSES.pyguses.curses import Curses
 from GameManager.menu import MainMenu
 from GameManager.demo import Demo
-from GameManager.adventure import Adventure
+from GameManager.new_game import NewGame
 from GameManager.controller import MouseController, KeyboardController
 
 # system setting
@@ -52,12 +52,12 @@ class Game():
         self.m_controller = MouseController(self.curses)
         self.k_controller = KeyboardController(self.curses)
         
-        self.select_dict = {0 : 'A New Adventure', 1 : 'Demo', 2 : 'Quit'}
+        self.select_dict = {0 : 'New Game', 1 : 'Demo', 2 : 'Quit'}
         menu_size = (40, 20)
         self.menu = MainMenu(self.curses, self.m_controller, self.k_controller, int(self.curses.win_width/2 - menu_size[0]/2), int(self.curses.win_height/2 - menu_size[1]/2), menu_size[0], menu_size[1], self.select_dict, align='mid', flick_enable=True)
         
         self.demo = Demo(self.curses, self.k_controller)        
-        self.adventure = Adventure(self.curses, self.m_controller, self.k_controller)
+        self.n_game = NewGame(self.curses, self.m_controller, self.k_controller)
         
     def run(self):
          
@@ -69,35 +69,32 @@ class Game():
             
             t0 = time.time()
             # --- Game logic should go here
-            # Display mouse cursor
-            self.m_controller.update()
             # Keyboard control
             self.k_controller.update(event)
-            
             # Main Menu
             if self.menu.enable:
                 flag = self.menu.update()
                 if self.k_controller.pressed != None:
                     if flag == 'Quit' or self.k_controller.pressed[pygame.K_ESCAPE]:
                         self.done = True
-                    elif flag == 'A New Adventure':
+                    elif flag == 'New Game':
                         self.curses.clear_window()
-                        self.adventure.init()
+                        self.n_game.start()
                         self.m_controller.initialization()
                         self.k_controller.initialization()
                     elif flag == 'Demo':
                         self.curses.clear_window()
-                        self.demo.init()
+                        self.demo.start()
                         self.m_controller.initialization()
                         self.k_controller.initialization()
             # Game
-            if self.adventure.enable:
-                self.adventure.update(event)
+            if self.n_game.enable:
+                self.n_game.update(event)
             else:
                 # Diable demo and reactivate main menu
-                if not self.menu.enable and flag == 'A New Adventure':
+                if not self.menu.enable and flag == 'New Game':
                     self.menu.initialization()
-                    self.adventure.initialization()   
+                    self.n_game.initialization()   
                     self.m_controller.initialization()
 
             # Demo
@@ -108,8 +105,10 @@ class Game():
                 if not self.menu.enable and flag == 'Demo':
                     self.menu.initialization()
                     self.demo.initialization()
-                    self.m_controller.initialization()
-                        
+                    self.m_controller.initialization()            
+            # Display mouse cursor
+            self.m_controller.update()
+            
             # Curses display
             self.screen.blit(self.curses.background, (0, 0))            
             self.screen.blit(self.curses.get_window_surface(), (0, 0))

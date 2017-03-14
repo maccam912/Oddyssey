@@ -131,7 +131,7 @@ class MainMenu(Menu):
         
         self.draw_UI()
                 
-        self.draw_frame()
+        self.draw_frame(title=' Main Menu ')
         self.draw_selection()
         self.draw_select_indicator()
         if self.flick_enable:

@@ -12,7 +12,7 @@ class Demo():
         self.is_init = False
         self.enable = False
     
-    def init(self):
+    def start(self):
         # Draw Title
         Hline(0, self.curses.win_width-1, 0, self.curses, char='/solid', foreground='navy', background='trans')
         title = 'Demo: show all characters'
