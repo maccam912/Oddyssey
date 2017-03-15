@@ -27,7 +27,7 @@ class NewGame():
         self.window_center = (int(self.curses.win_width/2), int(self.curses.win_height/2))
         self.select_dict = {0 : 'Exit to Main Menu', 1 : 'Exit Game'}
         self.menu_size = (40, 20)
-        self.menu = Menu(self.curses, self.mouse_controller, self.keyboard_controller, int(self.curses.win_width/2 - self.menu_size[0]/2), int(self.curses.win_height/2 - self.menu_size[1]/2), self.menu_size[0], self.menu_size[1], self.select_dict, align='mid', flick_enable=True)
+        self.menu = Menu(self.curses, self.mouse_controller, self.keyboard_controller, int(self.curses.win_width/2 - self.menu_size[0]/2), int(self.curses.win_height/2 - self.menu_size[1]/2), self.menu_size[0], self.menu_size[1], self.select_dict, align='mid', flick_enable=False, indicator_enable=False)
         
         # Draw UI
         
@@ -40,7 +40,7 @@ class NewGame():
             self.subscreen = SubScreen(0, 0, self.curses.win_width, screen_size, self.curses)
             self.toolbar = SubScreen(0, screen_size, self.curses.win_width, self.curses.win_height - screen_size, self.curses)
         else:
-            raise ValueError('Error: Wrong Resolution.')        
+            raise ValueError('Error: Wrong resolution.')        
         self.toolbar.fill_char('/solid', 'teal', 'trans')
         
        
@@ -73,26 +73,27 @@ class NewGame():
                     self.timer_enable = not self.timer_enable                
                 self.key_block = False
             
-            if self.keyboard_controller.pressed[pygame.K_w]:
-                self.player_pos[1] -= 1
-            if self.keyboard_controller.pressed[pygame.K_x]:
-                self.player_pos[1] += 1
-            if self.keyboard_controller.pressed[pygame.K_a]:
-                self.player_pos[0] -= 1
-            if self.keyboard_controller.pressed[pygame.K_d]:
-                self.player_pos[0] += 1
-            if self.keyboard_controller.pressed[pygame.K_q]:
-                self.player_pos[0] -= 1
-                self.player_pos[1] -= 1
-            if self.keyboard_controller.pressed[pygame.K_e]:
-                self.player_pos[0] += 1
-                self.player_pos[1] -= 1
-            if self.keyboard_controller.pressed[pygame.K_c]:
-                self.player_pos[0] += 1
-                self.player_pos[1] += 1
-            if self.keyboard_controller.pressed[pygame.K_z]:
-                self.player_pos[0] -= 1
-                self.player_pos[1] += 1
+            if self.timer_enable:
+                if self.keyboard_controller.pressed[pygame.K_w]:
+                    self.player_pos[1] -= 1
+                if self.keyboard_controller.pressed[pygame.K_x]:
+                    self.player_pos[1] += 1
+                if self.keyboard_controller.pressed[pygame.K_a]:
+                    self.player_pos[0] -= 1
+                if self.keyboard_controller.pressed[pygame.K_d]:
+                    self.player_pos[0] += 1
+                if self.keyboard_controller.pressed[pygame.K_q]:
+                    self.player_pos[0] -= 1
+                    self.player_pos[1] -= 1
+                if self.keyboard_controller.pressed[pygame.K_e]:
+                    self.player_pos[0] += 1
+                    self.player_pos[1] -= 1
+                if self.keyboard_controller.pressed[pygame.K_c]:
+                    self.player_pos[0] += 1
+                    self.player_pos[1] += 1
+                if self.keyboard_controller.pressed[pygame.K_z]:
+                    self.player_pos[0] -= 1
+                    self.player_pos[1] += 1
                 
         if self.menu_enable:
             self.timer_enable = False

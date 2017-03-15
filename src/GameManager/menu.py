@@ -5,7 +5,7 @@ from PYGUSES.pyguses.form import Hline, Frame
 
 class Menu():
     
-    def __init__(self, curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align='mid', flick_enable=True):
+    def __init__(self, curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align='mid', flick_enable=False, indicator_enable=False):
         self.curses = curses
         self.mouse_controller = mouse_controller
         self.keyboard_controller = keyboard_controller
@@ -16,6 +16,7 @@ class Menu():
         self.select_dict = select_dict
         self.align = align
         self.flick_enable = flick_enable
+        self.indicator_enable = indicator_enable
     
     def initialization(self):
         self.sel_ind = 0
@@ -24,7 +25,7 @@ class Menu():
         
         self.draw_frame()
         self.draw_selection()
-        self.draw_select_indicator()
+        self.draw_select_n_indicator()
         if self.flick_enable:
             self.flicker = Flicker(curses=self.curses, flick_type=1, interval=500)        
         
@@ -59,7 +60,7 @@ class Menu():
             message = ' '*2 + self.select_dict[ind] + ' '*2
             self.curses.put_message(label_x, self.window_center[1] - int(self.height/2) + (ind + 1) * int(self.height/(len(self.select_dict.keys())+1)), message, foreground='white', background='trans', auto=True, align=label_align)
     
-    def draw_select_indicator(self):
+    def draw_select_n_indicator(self):
         message = ' ' + self.select_dict[self.sel_ind] + ' '
         char_list = self.curses.get_char_list(message)
         # Coordinates
@@ -67,8 +68,9 @@ class Menu():
             label_x = self.window_center[0] - int(len(char_list)/2)
             label_y = self.window_center[1] - int(self.height/2) + (self.sel_ind + 1) * int(self.height/(len(self.select_dict.keys())+1))
         # Draw selected
-        self.curses.put_char(label_x -1, label_y, '/Right', 'white', 'trans')
-        self.curses.put_char(label_x + len(char_list), label_y, '/Left', 'white', 'trans')
+        if self.indicator_enable:
+            self.curses.put_char(label_x -1, label_y, '/Right', 'white', 'trans')
+            self.curses.put_char(label_x + len(char_list), label_y, '/Left', 'white', 'trans')
     
     def update(self):
         # Keyboard event
@@ -86,12 +88,12 @@ class Menu():
                 self.draw_selection(ind=self.sel_ind)
                 self.sel_ind -= 1
                 self.sel_ind %= len(self.select_dict.keys())
-                self.draw_select_indicator()
+                self.draw_select_n_indicator()
             if self.keyboard_controller.pressed[pygame.K_x] or self.keyboard_controller.pressed[pygame.K_DOWN]:
                 self.draw_selection(ind=self.sel_ind)
                 self.sel_ind += 1
                 self.sel_ind %= len(self.select_dict.keys())
-                self.draw_select_indicator()
+                self.draw_select_n_indicator()
             if self.keyboard_controller.pressed[pygame.K_s] or self.keyboard_controller.pressed[ pygame.K_KP_ENTER] or self.keyboard_controller.pressed[ pygame.K_RETURN]:
                 flag = self.select()
         return flag
@@ -115,8 +117,8 @@ class Menu():
                 self.flicker.refresh(x, label_y)
             
 class MainMenu(Menu):
-    def __init__(self, curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align='mid', flick_enable=False):
-        super(MainMenu, self).__init__(curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align, flick_enable)
+    def __init__(self, curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align='mid', flick_enable=False, indicator_enable=False):
+        super(MainMenu, self).__init__(curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align, flick_enable, indicator_enable)
         self.initialization()
     
     def initialization(self):
@@ -133,7 +135,7 @@ class MainMenu(Menu):
                 
         self.draw_frame(title=' Main Menu ')
         self.draw_selection()
-        self.draw_select_indicator()
+        self.draw_select_n_indicator()
         if self.flick_enable:
             self.flicker = Flicker(curses=self.curses, flick_type=1, interval=500)
             

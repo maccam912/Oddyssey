@@ -54,7 +54,7 @@ class Game():
         
         self.select_dict = {0 : 'New Game', 1 : 'Demo', 2 : 'Quit'}
         menu_size = (40, 20)
-        self.menu = MainMenu(self.curses, self.m_controller, self.k_controller, int(self.curses.win_width/2 - menu_size[0]/2), int(self.curses.win_height/2 - menu_size[1]/2), menu_size[0], menu_size[1], self.select_dict, align='mid', flick_enable=True)
+        self.menu = MainMenu(self.curses, self.m_controller, self.k_controller, int(self.curses.win_width/2 - menu_size[0]/2), int(self.curses.win_height/2 - menu_size[1]/2), menu_size[0], menu_size[1], self.select_dict, align='mid', flick_enable=False, indicator_enable=False)
         
         self.demo = Demo(self.curses, self.k_controller)        
         self.n_game = NewGame(self.curses, self.m_controller, self.k_controller)
@@ -112,6 +112,7 @@ class Game():
             # Curses display
             self.screen.blit(self.curses.background, (0, 0))            
             self.screen.blit(self.curses.get_window_surface(), (0, 0))
+            self.screen.blit(self.curses.foreground, (0, 0))
                                 
             # --- Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
