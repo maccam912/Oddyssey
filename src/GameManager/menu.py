@@ -36,10 +36,10 @@ class Menu():
             self.mouse_controller.is_mouse_recorded = False
         self.menu_sec = self.curses.get_cell_section(self.x, self.y, self.width, self.height).copy()
         # Draw menu frame
-        Frame(self.x, self.y, self.width, self.height, self.curses, style=style, is_filled=True, char=' ', foreground='white', background='trans', frame_foreground='white', frame_background='trans')
+        Frame(self.x, self.y, self.width, self.height, self.curses, style=style, is_filled=True, char=' ', foreground='peru', background='wheat', frame_foreground='peru', frame_background='transparent')
         # Main Menu
         if title != None:
-            self.curses.put_message(self.window_center[0], self.window_center[1] - int(self.height/2), title, foreground='trans', background='white', auto=True, align='mid')
+            self.curses.put_message(self.window_center[0], self.window_center[1] - int(self.height/2), title, foreground='transparent', background='peru', auto=True, align='mid')
     
     def exit_menu(self):
         self.curses.set_cell_section(self.x, self.y, self.menu_sec)
@@ -55,10 +55,10 @@ class Menu():
             # Selections
             for i in range(len(self.select_dict.keys())):
                 message = self.select_dict[i]
-                self.curses.put_message(label_x, self.window_center[1] - int(self.height/2) + (i + 1) * int(self.height/(len(self.select_dict.keys())+1)), message, foreground='white', background='trans', auto=True, align=label_align)
+                self.curses.put_message(label_x, self.window_center[1] - int(self.height/2) + (i + 1) * int(self.height/(len(self.select_dict.keys())+1)), message, foreground='peru', background='wheat', auto=True, align=label_align)
         else:
             message = ' '*2 + self.select_dict[ind] + ' '*2
-            self.curses.put_message(label_x, self.window_center[1] - int(self.height/2) + (ind + 1) * int(self.height/(len(self.select_dict.keys())+1)), message, foreground='white', background='trans', auto=True, align=label_align)
+            self.curses.put_message(label_x, self.window_center[1] - int(self.height/2) + (ind + 1) * int(self.height/(len(self.select_dict.keys())+1)), message, foreground='peru', background='wheat', auto=True, align=label_align)
     
     def draw_select_n_indicator(self):
         message = ' ' + self.select_dict[self.sel_ind] + ' '
@@ -69,8 +69,8 @@ class Menu():
             label_y = self.window_center[1] - int(self.height/2) + (self.sel_ind + 1) * int(self.height/(len(self.select_dict.keys())+1))
         # Draw selected
         if self.indicator_enable:
-            self.curses.put_char(label_x -1, label_y, '/Right', 'white', 'trans')
-            self.curses.put_char(label_x + len(char_list), label_y, '/Left', 'white', 'trans')
+            self.curses.put_char(label_x -1, label_y, '/Right', 'white', 'transparent')
+            self.curses.put_char(label_x + len(char_list), label_y, '/Left', 'white', 'transparent')
     
     def update(self):
         # Keyboard event
@@ -110,7 +110,7 @@ class Menu():
             label_x = self.window_center[0] - int(len(char_list)/2)
             label_y = self.window_center[1] - int(self.height/2) + (self.sel_ind + 1) * int(self.height/(len(self.select_dict.keys())+1))
         for x in range(len(char_list)):
-            self.curses.put_char(label_x + x, label_y, char_list[x], 'red', 'trans')
+            self.curses.put_char(label_x + x, label_y, char_list[x], 'brown', 'tan')
             
         if self.flick_enable:
             for x in range(label_x, label_x + len(char_list)):
@@ -143,7 +143,7 @@ class MainMenu(Menu):
         # Draw background
         self.draw_background()
         # Selection info.
-        Hline(0, self.curses.win_width-1, self.curses.win_height-1, self.curses, char='/solid', foreground='navy', background='trans')
+        Hline(0, self.curses.win_width-1, self.curses.win_height-1, self.curses, char='/solid', foreground='navy', background='transparent')
         message = '</up/w>: move up, </down/x>: move down, <s/Enter>: select, <ESC>: quit'
         self.curses.put_message(self.curses.win_width-1, self.curses.win_height-1, message, foreground='yellow', background='navy', auto=True, align='right')
     
@@ -153,4 +153,4 @@ class MainMenu(Menu):
             for j in range(self.curses.win_width):
                 h_ind = [0,11,12,13][random.randint(0, 3)]
                 w_ind = random.randint(0, self.curses.image_array.shape[0] - 1)
-                self.curses.put_char(j, i, self.curses.char_array[h_ind, w_ind], 'gray', 'trans')
+                self.curses.put_char(j, i, self.curses.char_array[h_ind, w_ind], 'slategray', 'transparent')

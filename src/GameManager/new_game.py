@@ -41,7 +41,7 @@ class NewGame():
             self.toolbar = SubScreen(0, screen_size, self.curses.win_width, self.curses.win_height - screen_size, self.curses)
         else:
             raise ValueError('Error: Wrong resolution.')        
-        self.toolbar.fill_char('/solid', 'teal', 'trans')
+        self.toolbar.fill_char('/solid', 'teal', 'transparent')
         
        
         # Set control flag
@@ -56,12 +56,12 @@ class NewGame():
         # Gameloop
         if self.timer_enable:
             # Draw grass tiles
-            self.subscreen.fill_char('.', 'green', 'trans')
-            self.subscreen.put_char(self.player_pos[0], self.player_pos[1], '/face', 'yellow', 'trans')
+            self.subscreen.fill_char('.', 'green', 'transparent')
+            self.subscreen.put_char(self.player_pos[0], self.player_pos[1], '/face', 'yellow', 'transparent')
              # Draw counter
             self.timer += 1
             message = '%04d' %self.timer
-            self.subscreen.put_message(3, 0 , message[-4:], foreground='white', background='trans', auto=True, align='right')
+            self.subscreen.put_message(3, 0 , message[-4:], foreground='white', background='transparent', auto=True, align='right')
 
         # Keyboard events
         if self.keyboard_controller.pressed != None:
@@ -116,9 +116,9 @@ class NewGame():
         # Draw timer state
         message = 'PULSED'
         if self.timer_enable:
-            self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, '/solid'*len(message), foreground='teal', background='trans', auto=True, align='right')
+            self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, '/solid'*len(message), foreground='teal', background='transparent', auto=True, align='right')
         else:
-            self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, message, foreground='white', background='trans', auto=True, align='right')
+            self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, message, foreground='white', background='transparent', auto=True, align='right')
 
         
         return self.enable
