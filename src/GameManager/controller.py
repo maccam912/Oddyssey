@@ -21,7 +21,9 @@ class MouseController(Controller):
     
     def initialization(self):
         self.is_mouse_recorded = False
+        self.click_blocked = True
         self.mouse_pos = (self.x, self.y)
+        self.pressed = None
     
     def update(self):
         if self.enable:
@@ -29,6 +31,17 @@ class MouseController(Controller):
     
     def update_mouse(self):
         # Mouse event
+        self.pressed = None        
+        if self.is_blocked:
+            if pygame.mouse.get_pressed() != (0, 0, 0) and self.click_blocked:
+                self.pressed = pygame.mouse.get_pressed()
+                self.click_blocked = False
+            if pygame.mouse.get_pressed() == (0, 0, 0):
+                self.click_blocked = True
+        else:
+            self.pressed = pygame.mouse.get_pressed()
+        
+        # Draw cursor  
         self.mouse_pos = self.curses.get_mouse_pos()        
         if not self.is_mouse_recorded:
             self.mouse_temp_pos = self.mouse_pos
@@ -44,6 +57,7 @@ class MouseController(Controller):
         temp['foreground'] = 'maroon'
         temp['background'] = 'yellow'
         self.curses.set_cell(self.mouse_pos[0], self.mouse_pos[1], temp)
+        
 
 class KeyboardController(Controller):
     def __init__(self, curses, enable=True, is_blocked=True):
@@ -52,6 +66,7 @@ class KeyboardController(Controller):
         
     def initialization(self):
         self.key_blocked = True
+        self.pressed = None
     
     def update(self, event):
         if self.enable:

@@ -31,12 +31,13 @@ class Menu():
         
         
     def draw_frame(self, style=0, title=None):
+        # Save the blocked section on screen
         if self.mouse_controller.mouse_pos[0] >= self.x and self.mouse_controller.mouse_pos[0] < self.x + self.width and self.mouse_controller.mouse_pos[1] >= self.y and self.mouse_controller.mouse_pos[1] < self.y + self.height:
             self.curses.set_cell(self.mouse_controller.mouse_pos[0], self.mouse_controller.mouse_pos[1], self.mouse_controller.mouse_temp)
             self.mouse_controller.is_mouse_recorded = False
         self.menu_sec = self.curses.get_cell_section(self.x, self.y, self.width, self.height).copy()
         # Draw menu frame
-        Frame(self.x, self.y, self.width, self.height, self.curses, style=style, is_filled=True, char=' ', foreground='peru', background='wheat', frame_foreground='peru', frame_background='transparent')
+        Frame(self.x, self.y, self.width, self.height, self.curses, style=style, is_filled=True, char='/solid', foreground='wheat', background='transparent', frame_foreground='peru', frame_background='transparent')
         # Main Menu
         if title != None:
             self.curses.put_message(self.window_center[0], self.window_center[1] - int(self.height/2), title, foreground='transparent', background='peru', auto=True, align='mid')
@@ -68,17 +69,25 @@ class Menu():
             label_x = self.window_center[0] - int(len(char_list)/2)
             label_y = self.window_center[1] - int(self.height/2) + (self.sel_ind + 1) * int(self.height/(len(self.select_dict.keys())+1))
         # Draw selected
+#        for x in range(1, len(char_list)-1):
+#            self.curses.put_char(label_x + x, label_y, char_list[x], 'brown', 'tan')
+        # Draw indicator
         if self.indicator_enable:
-            self.curses.put_char(label_x -1, label_y, '/Right', 'white', 'transparent')
-            self.curses.put_char(label_x + len(char_list), label_y, '/Left', 'white', 'transparent')
+            self.curses.put_char(label_x -1, label_y, '/Right', 'peru', 'wheat')
+            self.curses.put_char(label_x + len(char_list), label_y, '/Left', 'peru', 'wheat')
     
     def update(self):
-        # Keyboard event
-        flag = self.update_keyboard()
+        # Keyboard and mouse
+        if self.update_mouse() != None:
+            flag = self.update_mouse()
+        else:
+            flag = self.update_keyboard()
+        
         # Update flicker handler
         if self.flick_enable:
             self.flicker.update()
-        self.refresh_selected()        
+        self.refresh_selected()    
+    
         return flag
     
     def update_keyboard(self):
@@ -98,9 +107,33 @@ class Menu():
                 flag = self.select()
         return flag
     
+    def update_mouse(self):
+        flag = None
+        if self.align == 'mid':
+            label_x = self.window_center[0]
+        
+        (mouse_x, mouse_y) = self.curses.get_mouse_pos()
+        
+        for i in range(len(self.select_dict.keys())):
+            message = self.select_dict[i]
+            # Check if mouse cursor in the message region
+            if mouse_y == self.window_center[1] - int(self.height/2) + (i + 1) * int(self.height/(len(self.select_dict.keys())+1)) and mouse_x >= label_x - int(len(message)/2) and mouse_x < label_x - int(len(message)/2) + len(message):
+                # Redraw non-selected options
+                for j in range(len(self.select_dict.keys())):
+                    if j != i:
+                        self.draw_selection(ind=j)
+                # Hightlight the selected option
+                self.sel_ind = i
+                self.draw_select_n_indicator()
+                if self.mouse_controller.pressed == (1, 0, 0):
+                    flag = self.select()
+                break  
+        return flag
+    
     def select(self):
         self.enable = False
-        return self.select_dict[self.sel_ind]
+        flag = self.select_dict[self.sel_ind]
+        return flag
     
     def refresh_selected(self):
         message = self.select_dict[self.sel_ind]
@@ -109,6 +142,7 @@ class Menu():
         if self.align == 'mid':
             label_x = self.window_center[0] - int(len(char_list)/2)
             label_y = self.window_center[1] - int(self.height/2) + (self.sel_ind + 1) * int(self.height/(len(self.select_dict.keys())+1))
+        
         for x in range(len(char_list)):
             self.curses.put_char(label_x + x, label_y, char_list[x], 'brown', 'tan')
             
