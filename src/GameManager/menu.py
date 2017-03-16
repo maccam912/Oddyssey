@@ -5,7 +5,7 @@ from PYGUSES.pyguses.form import Hline, Frame
 
 class Menu():
     
-    def __init__(self, curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align='mid', flick_enable=False, indicator_enable=False):
+    def __init__(self, curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align='mid', flick_enable=False, indicator_enable=False, mouse_enable=True):
         self.curses = curses
         self.mouse_controller = mouse_controller
         self.keyboard_controller = keyboard_controller
@@ -17,6 +17,7 @@ class Menu():
         self.align = align
         self.flick_enable = flick_enable
         self.indicator_enable = indicator_enable
+        self.mouse_enable = mouse_enable
     
     def initialization(self):
         self.sel_ind = 0
@@ -78,7 +79,7 @@ class Menu():
     
     def update(self):
         # Keyboard and mouse
-        if self.update_mouse() != None:
+        if self.mouse_enable and self.update_mouse() != None:
             flag = self.update_mouse()
         else:
             flag = self.update_keyboard()
@@ -151,8 +152,8 @@ class Menu():
                 self.flicker.refresh(x, label_y)
             
 class MainMenu(Menu):
-    def __init__(self, curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align='mid', flick_enable=False, indicator_enable=False):
-        super(MainMenu, self).__init__(curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align, flick_enable, indicator_enable)
+    def __init__(self, curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align='mid', flick_enable=False, indicator_enable=False, mouse_enable=True):
+        super(MainMenu, self).__init__(curses, mouse_controller, keyboard_controller, x, y, width, height, select_dict, align, flick_enable, indicator_enable, mouse_enable)
         self.initialization()
     
     def initialization(self):

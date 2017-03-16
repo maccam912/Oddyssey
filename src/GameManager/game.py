@@ -54,7 +54,8 @@ class Game():
         
         self.select_dict = {0 : 'New Game', 1 : 'Demo', 2 : 'Quit'}
         menu_size = (40, 20)
-        self.menu = MainMenu(self.curses, self.mouse_controller, self.keyboard_controller, int(self.curses.win_width/2 - menu_size[0]/2), int(self.curses.win_height/2 - menu_size[1]/2), menu_size[0], menu_size[1], self.select_dict, align='mid', flick_enable=True, indicator_enable=True)
+        self.menu = MainMenu(self.curses, self.mouse_controller, self.keyboard_controller, int(self.curses.win_width/2 - menu_size[0]/2), int(self.curses.win_height/2 - menu_size[1]/2), menu_size[0], menu_size[1], \
+                             self.select_dict, align='mid', flick_enable=True, indicator_enable=True, mouse_enable=True)
         
         self.demo = Demo(self.curses, self.keyboard_controller)        
         self.new_game = NewGame(self.curses, self.mouse_controller, self.keyboard_controller)

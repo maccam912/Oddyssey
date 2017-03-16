@@ -27,7 +27,8 @@ class NewGame():
         self.window_center = (int(self.curses.win_width/2), int(self.curses.win_height/2))
         self.select_dict = {0 : 'Exit to Main Menu', 1 : 'Exit Game'}
         self.menu_size = (40, 20)
-        self.menu = Menu(self.curses, self.mouse_controller, self.keyboard_controller, int(self.curses.win_width/2 - self.menu_size[0]/2), int(self.curses.win_height/2 - self.menu_size[1]/2), self.menu_size[0], self.menu_size[1], self.select_dict, align='mid', flick_enable=False, indicator_enable=False)
+        self.menu = Menu(self.curses, self.mouse_controller, self.keyboard_controller, int(self.curses.win_width/2 - self.menu_size[0]/2), int(self.curses.win_height/2 - self.menu_size[1]/2), self.menu_size[0], self.menu_size[1], \
+                         self.select_dict, align='mid', flick_enable=False, indicator_enable=False, mouse_enable=True)
         
         # Draw UI
         
