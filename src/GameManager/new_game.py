@@ -1,7 +1,7 @@
 import pygame
-from PYGUSES.pyguses.form import Frame, Rect
 from GameManager.menu import Menu
 from GameManager.subscreen import SubScreen
+from GameManager.map import Map
 
 class NewGame():
     
@@ -44,7 +44,9 @@ class NewGame():
             raise ValueError('Error: Wrong resolution.')        
         self.toolbar.fill_char('/solid', 'teal', 'transparent')
         
-       
+        # Initialize game
+        self.map = Map(0, 0, '../assets/data/level/level_0.grid')
+        
         # Set control flag
         self.is_init = True
         self.enable = True
@@ -57,7 +59,9 @@ class NewGame():
         # Gameloop
         if self.timer_enable:
             # Draw grass tiles
-            self.subscreen.fill_char('.', 'green', 'transparent')
+            sec = self.map.get_cell_section(0, 0, self.subscreen.width, self.subscreen.height)
+            self.curses.set_cell_section(0, 0, sec)
+            
             self.subscreen.put_char(self.player_pos[0], self.player_pos[1], '/face', 'yellow', 'transparent')
              # Draw counter
             self.timer += 1
