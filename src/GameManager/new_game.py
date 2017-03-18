@@ -2,6 +2,7 @@ import pygame
 from GameManager.menu import Menu
 from GameManager.subscreen import SubScreen
 from GameManager.map import Map
+from GameManager.ai import a_star_search, reconstruct_path
 
 class NewGame():
     
@@ -46,7 +47,7 @@ class NewGame():
         
         # Initialize game
         self.map = Map(0, 0, '../assets/data/level/level_0.grid')
-        
+                
         # Set control flag
         self.is_init = True
         self.enable = True
@@ -54,6 +55,7 @@ class NewGame():
         
         # Game object initialization
         self.player_pos = [2, 2]
+        self.goal = [25, 15]
     
     def update(self, event):
         # Gameloop
@@ -63,6 +65,15 @@ class NewGame():
             self.curses.set_cell_section(0, 0, sec)
             
             self.subscreen.put_char(self.player_pos[0], self.player_pos[1], '/face', 'yellow', 'transparent')
+            self.subscreen.put_char(self.goal[0], self.goal[1], '/_face', 'yellow', 'transparent')
+            
+            
+            came_from, cost_so_far = a_star_search(self.map, self.player_pos, self.goal)
+            path = reconstruct_path(came_from, self.player_pos, self.goal)
+            for node in path:
+                if node != tuple(self.player_pos) and node != tuple(self.goal):
+                    self.subscreen.put_char(node[0], node[1], '/solid', 'yellow', 'transparent')
+            
              # Draw counter
             self.timer += 1
             message = '%04d' %self.timer

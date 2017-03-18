@@ -1,8 +1,8 @@
 import numpy as np
 
 tiles = {
-        'grass' : {'cell': {'char' : '.', 'foreground' : 'green', 'background' : 'transparent'},        'passable' : True},
-        'wall'  : {'cell': {'char' : '/brick', 'foreground' : 'darkgray', 'background' : 'dimgray'},    'passable' : False}
+        'grass' : {'cell': {'char' : '.', 'foreground' : 'green', 'background' : 'transparent'},        'cost' : 1},
+        'wall'  : {'cell': {'char' : '/brick', 'foreground' : 'darkgray', 'background' : 'dimgray'},    'cost' : float('inf')}
         }
 
 class Map():
@@ -15,7 +15,7 @@ class Map():
     def initialization(self):
         self.tile_grid = self.load_tile_grid()
         self.cell_grid = self.get_cell_grid()
-        self.path_grid = self.get_path_grid()
+        self.cost_grid = self.get_cost_grid()
     
     def load_tile_grid(self):
         if self.file_path != None:
@@ -44,15 +44,89 @@ class Map():
                 cell_grid[i, j] = self.tile_grid[i, j]['cell']
         return cell_grid
     
-    def get_path_grid(self):
-        path_grid = np.ones([self.tile_grid.shape[0], self.tile_grid.shape[1]], dtype=bool)
+    def get_cost_grid(self):
+        cost_grid = np.ones([self.tile_grid.shape[0], self.tile_grid.shape[1]], dtype=float)
         for i in range(self.tile_grid.shape[0]):
             for j in range(self.tile_grid.shape[1]):
-                if not self.tile_grid[i, j]['passable']:
-                    path_grid[i, j] = False
-        return path_grid
+                cost_grid[i, j] = self.tile_grid[i, j]['cost']
+        return cost_grid
     
     def get_cell_section(self, x, y, width, height):
         temp_section = self.cell_grid.T
         section = temp_section[x : x + width, y : y + height].T
         return section
+    
+    def get_neighbors(self, position):
+        neighbors = []
+        
+        if position[0] > 0 and position[0] < self.width - 1:
+            if position[1] > 0 and position[1] < self.height - 1:
+                neighbors.append((position[0] - 1, position[1] - 1))
+                neighbors.append((position[0] - 1, position[1]))
+                neighbors.append((position[0] - 1, position[1] + 1))
+                neighbors.append((position[0] + 1, position[1] - 1))
+                neighbors.append((position[0] + 1, position[1]))
+                neighbors.append((position[0] + 1, position[1] + 1))
+                neighbors.append((position[0], position[1] - 1))
+                neighbors.append((position[0], position[1] + 1))
+            elif position[1] == 0:
+                neighbors.append((position[0] - 1, position[1]))
+                neighbors.append((position[0] - 1, position[1] + 1))
+                neighbors.append((position[0] + 1, position[1]))
+                neighbors.append((position[0] + 1, position[1] + 1))
+                neighbors.append((position[0], position[1] + 1))
+            elif position[1] == self.height - 1:
+                neighbors.append((position[0] - 1, position[1] - 1))
+                neighbors.append((position[0] - 1, position[1]))
+                neighbors.append((position[0] + 1, position[1] - 1))
+                neighbors.append((position[0] + 1, position[1]))
+                neighbors.append((position[0], position[1] - 1))
+        elif position[0] == 0:
+            if position[1] > 0 and position[1] < self.height - 1:
+                neighbors.append((position[0] + 1, position[1] - 1))
+                neighbors.append((position[0] + 1, position[1]))
+                neighbors.append((position[0] + 1, position[1] + 1))
+                neighbors.append((position[0], position[1] - 1))
+                neighbors.append((position[0], position[1] + 1))
+            elif position[1] == 0:
+                neighbors.append((position[0] + 1, position[1]))
+                neighbors.append((position[0] + 1, position[1] + 1))
+                neighbors.append((position[0], position[1] + 1))
+            elif position[1] == self.height - 1:
+                neighbors.append((position[0] + 1, position[1] - 1))
+                neighbors.append((position[0] + 1, position[1]))
+                neighbors.append((position[0], position[1] - 1))
+        elif position[0] == self.width - 1:
+            if position[1] > 0 and position[1] < self.height - 1:
+                neighbors.append((position[0] - 1, position[1] - 1))
+                neighbors.append((position[0] - 1, position[1]))
+                neighbors.append((position[0] - 1, position[1] + 1))
+                neighbors.append((position[0], position[1] - 1))
+                neighbors.append((position[0], position[1] + 1))
+            elif position[1] == 0:
+                neighbors.append((position[0] - 1, position[1]))
+                neighbors.append((position[0] - 1, position[1] + 1))
+                neighbors.append((position[0], position[1] + 1))
+            elif position[1] == self.height - 1:
+                neighbors.append((position[0] - 1, position[1] - 1))
+                neighbors.append((position[0] - 1, position[1]))
+                neighbors.append((position[0], position[1] - 1))
+        
+        # Remove impassable neighbors
+        for neighbor in neighbors:
+            if self.get_cost_by_position(neighbor) == float('inf'):
+                neighbors.remove(neighbor)
+        
+        return neighbors
+    
+    def get_cost_by_position(self, position):
+        cost = self.cost_grid[position[1], position[0]]
+        return cost
+    
+    def cost(self, from_position, to_position):
+        # Considers only the destination cost
+        cost = self.get_cost_by_position(to_position)
+        if to_position == (from_position[0] - 1, from_position[1] - 1) or to_position == (from_position[0] - 1, from_position[1] + 1) \
+        or to_position == (from_position[0] + 1, from_position[1] - 1) or to_position == (from_position[0] + 1, from_position[1] + 1):
+            cost *= np.sqrt(2)            
+        return cost
