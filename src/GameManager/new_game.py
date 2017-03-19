@@ -2,7 +2,8 @@ import pygame
 from GameManager.menu import Menu
 from GameManager.subscreen import SubScreen
 from GameManager.map import Map
-from GameManager.algorithm.path_finding import a_star_algorithm
+from GameManager.character import Player
+
 
 class NewGame():
     
@@ -46,7 +47,7 @@ class NewGame():
         self.toolbar.fill_char('/solid', 'teal', 'transparent')
         
         # Initialize game
-        self.map = Map(0, 0, '../assets/data/level/level_0.grid')
+        self.map = Map(0, 0, 'unexplored', 'fixed', '../assets/data/level/level_0.grid')
                 
         # Set control flag
         self.is_init = True
@@ -54,7 +55,7 @@ class NewGame():
         self.timer_enable = True
         
         # Game object initialization
-        self.player_pos = [2, 2]
+        self.player = Player(2, 2, '/face', 'yellow', 'transparent', 10)
         self.goal = [25, 15]
     
     def update(self, event):
@@ -64,17 +65,10 @@ class NewGame():
             sec = self.map.get_cell_section(0, 0, self.subscreen.width, self.subscreen.height)
             self.curses.set_cell_section(0, 0, sec)
             
-            self.subscreen.put_char(self.player_pos[0], self.player_pos[1], '/face', 'yellow', 'transparent')
+            self.player.draw(self.subscreen)
             self.subscreen.put_char(self.goal[0], self.goal[1], '/_face', 'yellow', 'transparent')
             
-            
-            path = a_star_algorithm(self.map, self.player_pos, self.goal)
-            if path != None:
-                for node in path:
-                    if node != tuple(self.player_pos) and node != tuple(self.goal):
-                        self.subscreen.put_char(node[0], node[1], '/solid', 'yellow', 'transparent')
-            else:
-                print('failed')
+            self.player.path_finding(self.map, self.goal, self.subscreen, True)
             
              # Draw counter
             self.timer += 1
@@ -82,37 +76,20 @@ class NewGame():
             self.subscreen.put_message(3, 0 , message[-4:], foreground='white', background='transparent', auto=True, align='right')
 
         # Keyboard events
+        if self.timer_enable:
+            self.player.update(self.keyboard_controller, self.map)
+        
         if self.keyboard_controller.pressed != None:
+            # Menu enable
             if self.keyboard_controller.pressed[pygame.K_ESCAPE]:
                 self.menu_enable = not self.menu_enable
-                
+            # Timer control
             if self.keyboard_controller.pressed[pygame.K_SPACE]:
                 if not self.menu_enable:
                     self.timer_enable = not self.timer_enable                
                 self.key_block = False
-            
-            if self.timer_enable:
-                if self.keyboard_controller.pressed[pygame.K_w]:
-                    self.player_pos[1] -= 1
-                if self.keyboard_controller.pressed[pygame.K_x]:
-                    self.player_pos[1] += 1
-                if self.keyboard_controller.pressed[pygame.K_a]:
-                    self.player_pos[0] -= 1
-                if self.keyboard_controller.pressed[pygame.K_d]:
-                    self.player_pos[0] += 1
-                if self.keyboard_controller.pressed[pygame.K_q]:
-                    self.player_pos[0] -= 1
-                    self.player_pos[1] -= 1
-                if self.keyboard_controller.pressed[pygame.K_e]:
-                    self.player_pos[0] += 1
-                    self.player_pos[1] -= 1
-                if self.keyboard_controller.pressed[pygame.K_c]:
-                    self.player_pos[0] += 1
-                    self.player_pos[1] += 1
-                if self.keyboard_controller.pressed[pygame.K_z]:
-                    self.player_pos[0] -= 1
-                    self.player_pos[1] += 1
                 
+        # Menu control
         if self.menu_enable:
             self.timer_enable = False
             # Draw menu
@@ -125,7 +102,7 @@ class NewGame():
             elif flag == 'Exit Game':
                 pygame.quit()
         else:
-            # Return cells in menu section
+            # Return cells within menu section
             if self.menu_init:
                 self.timer_enable = True
                 self.menu_init = False
