@@ -22,7 +22,7 @@ def heuristic(a, b):
     (x2, y2) = b
     return abs(x1 - x2) + abs(y1 - y2)
 
-def a_star_search(graph, start, goal):
+def a_star_algorithm(graph, start, goal):
     start = tuple(start)
     goal = tuple(goal)
     
@@ -37,7 +37,7 @@ def a_star_search(graph, start, goal):
         current = frontier.get()
         
         if current == goal:
-            break
+            return reconstruct_path(came_from, start, goal)
         
         for next in graph.get_neighbors(current):
             new_cost = cost_so_far[current] + graph.cost(current, next)
@@ -47,7 +47,8 @@ def a_star_search(graph, start, goal):
                 frontier.put(next, priority)
                 came_from[next] = current
                          
-    return came_from, cost_so_far
+    # Return None when there is no path                         
+    return None
 
 def reconstruct_path(came_from, start, goal):
     start = tuple(start)

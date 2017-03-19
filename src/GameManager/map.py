@@ -113,10 +113,8 @@ class Map():
                 neighbors.append((position[0], position[1] - 1))
         
         # Remove impassable neighbors
-        for neighbor in neighbors:
-            if self.get_cost_by_position(neighbor) == float('inf'):
-                neighbors.remove(neighbor)
-        
+        neighbors = [neighbor for neighbor in neighbors if self.get_cost_by_position(neighbor) != float('inf')]
+                
         return neighbors
     
     def get_cost_by_position(self, position):
@@ -126,6 +124,7 @@ class Map():
     def cost(self, from_position, to_position):
         # Considers only the destination cost
         cost = self.get_cost_by_position(to_position)
+        # Penalty on the diagonal directions
         if to_position == (from_position[0] - 1, from_position[1] - 1) or to_position == (from_position[0] - 1, from_position[1] + 1) \
         or to_position == (from_position[0] + 1, from_position[1] - 1) or to_position == (from_position[0] + 1, from_position[1] + 1):
             cost *= np.sqrt(2)            

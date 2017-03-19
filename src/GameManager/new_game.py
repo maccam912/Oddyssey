@@ -2,7 +2,7 @@ import pygame
 from GameManager.menu import Menu
 from GameManager.subscreen import SubScreen
 from GameManager.map import Map
-from GameManager.ai import a_star_search, reconstruct_path
+from GameManager.algorithm.path_finding import a_star_algorithm
 
 class NewGame():
     
@@ -68,11 +68,13 @@ class NewGame():
             self.subscreen.put_char(self.goal[0], self.goal[1], '/_face', 'yellow', 'transparent')
             
             
-            came_from, cost_so_far = a_star_search(self.map, self.player_pos, self.goal)
-            path = reconstruct_path(came_from, self.player_pos, self.goal)
-            for node in path:
-                if node != tuple(self.player_pos) and node != tuple(self.goal):
-                    self.subscreen.put_char(node[0], node[1], '/solid', 'yellow', 'transparent')
+            path = a_star_algorithm(self.map, self.player_pos, self.goal)
+            if path != None:
+                for node in path:
+                    if node != tuple(self.player_pos) and node != tuple(self.goal):
+                        self.subscreen.put_char(node[0], node[1], '/solid', 'yellow', 'transparent')
+            else:
+                print('failed')
             
              # Draw counter
             self.timer += 1
