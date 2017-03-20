@@ -7,10 +7,11 @@ from GameManager.character import Player
 
 class NewGame():
     
-    def __init__(self, curses, mouse_controller, keyboard_controller):
+    def __init__(self, curses, mouse_controller, keyboard_controller, is_realtime=False):
         self.curses = curses
         self.mouse_controller = mouse_controller
         self.keyboard_controller = keyboard_controller
+        self.is_realtime = is_realtime
         self.initialization()
     
     def initialization(self):
@@ -44,7 +45,7 @@ class NewGame():
             self.toolbar = SubScreen(0, screen_size, self.curses.win_width, self.curses.win_height - screen_size, self.curses)
         else:
             raise ValueError('Error: Wrong resolution.')        
-        self.toolbar.fill_char('/solid', 'teal', 'transparent')
+        self.toolbar.fill_char('/solid', 'wheat', 'transparent')
         
         # Initialize game
         self.map = Map(0, 0, 'unexplored', 'fixed', '../assets/data/level/level_0.grid')
@@ -55,7 +56,7 @@ class NewGame():
         self.timer_enable = True
         
         # Game object initialization
-        self.player = Player(2, 2, '/face', 'yellow', 'transparent', 10)
+        self.player = Player(2, 2, '/face', 'yellow', 'transparent', 15)
         self.goal = [25, 15]
     
     def update(self, event):
@@ -70,13 +71,16 @@ class NewGame():
             
 #            self.player.path_finding(self.map, self.goal, self.subscreen, True)
             
-             # Draw counter
-            self.timer += 1
+            # Draw counter
+            if self.is_realtime: 
+                self.timer += 1
             message = '%04d' %self.timer
             self.subscreen.put_message(3, 0 , message[-4:], foreground='white', background='transparent', auto=True, align='right')
 
         # Keyboard events
         if self.timer_enable:
+            if self.keyboard_controller.pressed != None and not self.is_realtime:
+                self.timer += 1
             self.player.update(self.keyboard_controller, self.map)
         
         if self.keyboard_controller.pressed != None:
@@ -111,7 +115,7 @@ class NewGame():
         # Draw timer state
         message = 'PULSED'
         if self.timer_enable:
-            self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, '/solid'*len(message), foreground='teal', background='transparent', auto=True, align='right')
+            self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, '/solid'*len(message), foreground='wheat', background='transparent', auto=True, align='right')
         else:
             self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, message, foreground='white', background='transparent', auto=True, align='right')
 

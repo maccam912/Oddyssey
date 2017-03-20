@@ -35,7 +35,7 @@ def raycasting_sight(graph, position, sight):
     # Post-processing artifact killer
     for x in range(max(position[0] - sight, 0) + 1, min(position[0] + sight, graph.visible_state_grid.shape[1]) - 1):
         for y in range(max(position[1] - sight, 0) + 1, min(position[1] + sight, graph.visible_state_grid.shape[0]) - 1):
-            if graph.visible_state_grid[y, x] == 1:
+            if graph.visible_state_grid[y, x] == 1 and not graph.block_vision_grid[y, x]:
                 # North-West region
                 if x < position[0] and y < position[1]:
                     if graph.block_vision_grid[y - 1, x]:
@@ -60,6 +60,19 @@ def raycasting_sight(graph, position, sight):
                         graph.visible_state_grid[y + 1, x] = 1
                     if graph.block_vision_grid[y , x + 1]:
                         graph.visible_state_grid[y, x + 1] = 1
+                # Harizontal
+                elif x == position[0]:
+                    if graph.block_vision_grid[y, x + 1]:
+                        graph.visible_state_grid[y, x + 1] = 1
+                    if graph.block_vision_grid[y, x - 1]:
+                        graph.visible_state_grid[y, x - 1] = 1
+                # Vertical
+                elif y == position[1]:
+                    if graph.block_vision_grid[y + 1, x]:
+                        graph.visible_state_grid[y + 1, x] = 1
+                    if graph.block_vision_grid[y - 1, x]:
+                        graph.visible_state_grid[y - 1, x] = 1
+                        
 
 def bresenhams_line_algorithm(start, end):
     line = []

@@ -1,7 +1,7 @@
 import numpy as np
 
 tiles = {
-        'grass' : {'cell': {'char' : '.', 'foreground' : 'green', 'background' : 'transparent'},        'cost' : 1              ,'block_vision' : False},
+        'grass' : {'cell': {'char' : '.', 'foreground' : 'green', 'background' : 'palegreen'},          'cost' : 1              ,'block_vision' : False},
         'wall'  : {'cell': {'char' : '/brick', 'foreground' : 'darkgray', 'background' : 'dimgray'},    'cost' : float('inf')   ,'block_vision' : True}
         }
 

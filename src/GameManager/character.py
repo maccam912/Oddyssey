@@ -3,13 +3,14 @@ from GameManager.algorithm.path_finding import a_star_algorithm
 from GameManager.algorithm.visibility import raycasting_sight
 
 class Character():
-    def __init__(self, x, y, char, foreground, background, sight):
+    def __init__(self, x, y, char, foreground, background, sight, is_blocked=True):
         self.x = x
         self.y = y
         self.char = char
         self.foreground = foreground
         self.background = background
         self.sight = sight
+        self.is_blocked = is_blocked
     
     def path_finding(self, graph, goal, screen, is_shown=False):
         path = a_star_algorithm(graph, self.get_pos(), goal)
@@ -35,14 +36,20 @@ class Character():
             return True
     
 class Player(Character):
-    def __init__(self, x, y, char, foreground, background, sight):
-        super(Player, self).__init__(x, y, char, foreground, background, sight)
+    def __init__(self, x, y, char, foreground, background, sight, is_blocked=True):
+        super(Player, self).__init__(x, y, char, foreground, background, sight, is_blocked)
     
     def update(self, keyboard_controller, graph):
+        # Nnbocked current position
+        if self.is_blocked:
+            graph.cost_grid[self.y, self.x] = graph.tile_grid[self.y, self.x]['cost']
         # Keyboard event
         self.update_keyboard(keyboard_controller, graph)
         # Mouse event
         raycasting_sight(graph, self.get_pos(), self.sight)
+        # Blocked moved position
+        if self.is_blocked:
+            graph.cost_grid[self.y, self.x] = float('inf')
         
     def update_keyboard(self, keyboard_controller, graph):
         if keyboard_controller.pressed != None:
