@@ -1,6 +1,6 @@
 import pygame
 from GameManager.algorithm.path_finding import a_star_algorithm
-from GameManager.algorithm.visibility import basic_sight
+from GameManager.algorithm.visibility import raycasting_sight
 
 class Character():
     def __init__(self, x, y, char, foreground, background, sight):
@@ -41,7 +41,8 @@ class Player(Character):
     def update(self, keyboard_controller, graph):
         # Keyboard event
         self.update_keyboard(keyboard_controller, graph)
-        basic_sight(graph, self.get_pos(), self.sight)
+        # Mouse event
+        raycasting_sight(graph, self.get_pos(), self.sight)
         
     def update_keyboard(self, keyboard_controller, graph):
         if keyboard_controller.pressed != None:
@@ -74,9 +75,4 @@ class Player(Character):
                 and self.is_grid_movable(graph, (self.x - 1, self.y + 1)):
                     self.x -= 1
                     self.y += 1
-    
-    
-    
-    
-        
-    
+ 

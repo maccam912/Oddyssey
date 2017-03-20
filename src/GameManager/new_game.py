@@ -68,7 +68,7 @@ class NewGame():
             self.player.draw(self.subscreen)
             self.subscreen.put_char(self.goal[0], self.goal[1], '/_face', 'yellow', 'transparent')
             
-            self.player.path_finding(self.map, self.goal, self.subscreen, True)
+#            self.player.path_finding(self.map, self.goal, self.subscreen, True)
             
              # Draw counter
             self.timer += 1

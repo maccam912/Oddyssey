@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 
 class Controller():
     def __init__(self, curses, enable=True, is_blocked=True):
@@ -42,7 +43,7 @@ class MouseController(Controller):
             self.pressed = pygame.mouse.get_pressed()
         
         # Draw cursor  
-        self.mouse_pos = self.curses.get_mouse_pos()        
+        self.mouse_pos = self.get_pos(self.curses)        
         if not self.is_mouse_recorded:
             self.mouse_temp_pos = self.mouse_pos
             self.mouse_temp = self.curses.get_cell(self.mouse_pos[0], self.mouse_pos[1]).copy()
@@ -57,8 +58,13 @@ class MouseController(Controller):
         temp['foreground'] = 'maroon'
         temp['background'] = 'yellow'
         self.curses.set_cell(self.mouse_pos[0], self.mouse_pos[1], temp)
-        
-
+            
+    def get_pos(self, curses):
+        (x, y) = pygame.mouse.get_pos()
+        x_ind = int(np.floor(x / curses.cell_width))
+        y_ind = int(np.floor(y / curses.cell_height))
+        return (x_ind, y_ind)
+    
 class KeyboardController(Controller):
     def __init__(self, curses, enable=True, is_blocked=True):
         super(KeyboardController, self).__init__(curses, enable, is_blocked)

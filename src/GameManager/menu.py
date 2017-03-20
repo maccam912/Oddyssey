@@ -113,7 +113,7 @@ class Menu():
         if self.align == 'mid':
             label_x = self.window_center[0]
         
-        (mouse_x, mouse_y) = self.curses.get_mouse_pos()
+        (mouse_x, mouse_y) = self.mouse_controller.get_pos(self.curses)
         
         for i in range(len(self.select_dict.keys())):
             message = self.select_dict[i]
