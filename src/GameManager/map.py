@@ -82,23 +82,27 @@ class Map():
         section = self.get_cell_section_by_visibility(x, y, width, height)
         return section
     
-    def get_cell_section_by_visibility(self, x, y, width, height):
-        section = np.empty([min(height, self.visible_state_grid.shape[0]), min(width, self.visible_state_grid.shape[1])], dtype=dict)
-        for i in range(x, min(x + width, self.visible_state_grid.shape[1])):
-            for j in range(y, min(y + height, self.visible_state_grid.shape[0])):
-                if self.visible_state_grid[j, i] == 0:
-                    # State: unexplored
-                    section[j, i] = {'char' : '/l1', 'foreground' : 'gray', 'background': 'transparent'}
-                elif self.visible_state_grid[j, i] == 1:
-                    # State: visible
-                    section[j, i] = self.cell_grid[j, i].copy()
-                elif self.visible_state_grid[j, i] == 2:
-                    # State: explored
-                    section[j, i] = self.cell_grid[j, i].copy()
-                    section[j, i]['foreground'] = 'lightgray'
-                    section[j, i]['background'] = 'transparent'
+    def get_cell_section_by_visibility(self, offset_x, offset_y, width, height):
+        section = np.empty([height, width], dtype=dict)
+        for i in range(width):
+            for j in range(height):
+                if i + offset_x >= 0 and i + offset_x < self.visible_state_grid.shape[1] and j + offset_y >= 0 and j + offset_y < self.visible_state_grid.shape[0]:
+                    if self.visible_state_grid[j + offset_y, i + offset_x] == 0:
+                        # State: unexplored
+                        section[j, i] = {'char' : '/l1', 'foreground' : 'gray', 'background': 'transparent'}
+                    elif self.visible_state_grid[j + offset_y, i + offset_x] == 1:
+                        # State: visible                    
+                        section[j, i] = self.cell_grid[j + offset_y, i + offset_x].copy()
+                    elif self.visible_state_grid[j + offset_y, i + offset_x] == 2:
+                        # State: explored
+                        section[j, i] = self.cell_grid[j + offset_y, i + offset_x].copy()
+                        section[j, i]['foreground'] = 'lightgray'
+                        section[j, i]['background'] = 'transparent'
+                    else:
+                        raise ValueError('Error: No matching state.')
                 else:
-                    raise ValueError('Error: No matching state.')
+                    section[j, i] = {'char' : ' ', 'foreground' : 'gray', 'background': 'transparent'}
+        
         return section
     
     # For path finding algorithm    

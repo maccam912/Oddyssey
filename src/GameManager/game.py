@@ -4,7 +4,7 @@ import pygame
 import configparser
 
 from PYGUSES.pyguses.curses import Curses
-from GameManager.menu import MainMenu
+from GameManager.gui.menu import MainMenu
 from GameManager.demo import Demo
 from GameManager.new_game import NewGame
 from GameManager.controller import MouseController, KeyboardController

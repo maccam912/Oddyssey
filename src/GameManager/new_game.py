@@ -1,6 +1,7 @@
+import numpy as np
 import pygame
-from GameManager.menu import Menu
-from GameManager.subscreen import SubScreen
+from GameManager.gui.menu import Menu
+from GameManager.gui.subscreen import SubScreen, MessageBar
 from GameManager.map import Map
 from GameManager.character import Player, Enemy, NPC
 
@@ -36,20 +37,16 @@ class NewGame():
         
         # Draw UI
         
-        if self.curses.screen_width > self.curses.screen_height:
-            screen_size =int(3/4 * self.curses.screen_width / self.curses.cell_width)
-            self.subscreen = SubScreen(0, 0, screen_size, self.curses.win_height, self.curses)
-            self.toolbar = SubScreen(screen_size, 0, self.curses.win_width - screen_size, self.curses.win_height, self.curses)
-        elif self.curses.screen_width < self.curses.screen_height:
-            screen_size =int(3/4 * self.curses.screen_height / self.curses.cell_height)
-            self.subscreen = SubScreen(0, 0, self.curses.win_width, screen_size, self.curses)
-            self.toolbar = SubScreen(0, screen_size, self.curses.win_width, self.curses.win_height - screen_size, self.curses)
-        else:
-            raise ValueError('Error: Wrong resolution.')        
-        self.toolbar.fill_char('/solid', 'wheat', 'transparent')
+        message_bar_height = int(np.ceil(self.curses.win_height / 10))
+        self.main_screen = SubScreen(0, 0, self.curses.win_width, self.curses.win_height - message_bar_height - 1, self.curses)
+        self.info_screen = SubScreen(0, self.curses.win_height - message_bar_height - 1, self.curses.win_width, 1, self.curses)
+        self.message_screen = SubScreen(0, self.curses.win_height - message_bar_height, self.curses.win_width, message_bar_height, self.curses)
+        self.message_bar = MessageBar(self.message_screen)
+        
+        self.info_screen.fill_char(char='/solid', foreground='teal', background='transparent')
         
         # Initialize game
-        self.map = Map(0, 0, 'unexplored', 'fixed', '../assets/data/level/level_0.grid', [])
+        self.map = Map(0, 0, 'unexplored', 'fixed', '../assets/data/level/playground.grid', [])
                 
         # Set control flag
         self.is_init = True
@@ -57,11 +54,13 @@ class NewGame():
         self.timer_enable = True
         
         # Game object initialization
-        self.player = Player(2, 2, '/face', 'wheat', 'transparent', self.map, 'Hero', 15, 20)
-        self.enemy = Enemy(21, 8, 'g', 'green', 'transparent', self.map, 'goblin', 15, 10)
-        self.npc = NPC(13, 24, '/face', 'peru', 'transparent', self.map, 'farmer', 15, 10)
+        self.player = Player(2, 2, '/face', 'wheat', 'transparent', self.map, 'Hero', 15, 20, self.message_bar)
+        self.enemy0 = Enemy(21, 8, 'g', 'green', 'transparent', self.map, 'goblin', 15, 6, self.message_bar)
+        self.enemy1 = Enemy(40, 8, 'g', 'green', 'transparent', self.map, 'goblin', 15, 6, self.message_bar)
+        self.npc = NPC(13, 24, '/face', 'peru', 'transparent', self.map, 'farmer', 15, 10, self.message_bar)
         
-        self.map.character_list.append(self.enemy)
+        self.map.character_list.append(self.enemy0)
+        self.map.character_list.append(self.enemy1)
         self.map.character_list.append(self.npc)
         self.map.character_list.append(self.player)
         
@@ -81,27 +80,37 @@ class NewGame():
         
         # Keyboard events
         if self.timer_enable:
-            if self.keyboard_controller.pressed != None and not self.is_realtime and not self.keyboard_controller.pressed[pygame.K_SPACE]:
+            if self.keyboard_controller.pressed != None and not self.is_realtime\
+            and not self.keyboard_controller.pressed[pygame.K_SPACE] and not self.keyboard_controller.pressed[pygame.K_ESCAPE]:
                 self.timer += 1
                 self.character_update = True
             
         if self.character_update:
             for character in self.map.character_list:
-                character.update(self.keyboard_controller, self.subscreen)
+                character.update(self.keyboard_controller)
             self.character_update = False
         
         # Display
         if self.timer_enable:
-            # Draw grass tiles
-            sec = self.map.get_cell_section(0, 0, self.subscreen.width, self.subscreen.height)
-            self.curses.set_cell_section(0, 0, sec)
+            # Draw map tiles
             
+            # Camera control
+            (offset_x , offset_y) = self.player.x - int(self.main_screen.width/2), self.player.y - int(self.main_screen.height/2)
+#            (offset_x , offset_y) = 0, 0
+            
+            sec = self.map.get_cell_section(offset_x, offset_y, self.main_screen.width, self.main_screen.height)
+            self.curses.set_cell_section(self.main_screen.x, self.main_screen.y, sec)
+            
+            # Draw characters
             for character in self.map.character_list:
-                character.draw(self.subscreen)
+                character.draw(offset_x, offset_y, self.main_screen)
             
             # Draw counter            
             message = '%04d' %self.timer
-            self.subscreen.put_message(3, 0 , message[-4:], foreground='white', background='transparent', auto=True, align='right')
+            self.main_screen.put_message(3, 0 , message[-4:], foreground='white', background='transparent', auto=True, align='right')
+            
+            # Draw message bar
+            self.message_bar.draw()
         
         # Menu control
         if self.menu_enable:
@@ -125,7 +134,7 @@ class NewGame():
         # Draw timer state
         message = 'PULSED'
         if self.timer_enable:
-            self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, '/solid'*len(message), foreground='wheat', background='transparent', auto=True, align='right')
+            self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, '/solid'*len(message), foreground='transparent', background='transparent', auto=True, align='right')
         else:
             self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, message, foreground='white', background='transparent', auto=True, align='right')
 

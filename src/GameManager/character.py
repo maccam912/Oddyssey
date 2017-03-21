@@ -3,7 +3,7 @@ from GameManager.algorithm.path_finding import a_star_algorithm
 from GameManager.algorithm.visibility import raycasting_sight, bresenhams_line_algorithm
 
 class Character():
-    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, is_blocked=True):
+    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked=True):
         self.x = x
         self.y = y
         self.char = char
@@ -13,6 +13,7 @@ class Character():
         self.name = name
         self.sight = sight
         self.health = health
+        self.message_bar = message_bar
         self.is_blocked = is_blocked
     
     def initialization(self):
@@ -32,9 +33,10 @@ class Character():
     def get_pos(self):
         return (self.x, self.y)    
     
-    def draw(self, screen):
-        if self.graph.visible_state_grid[self.y, self.x] == 1:
-            screen.put_char(self.x, self.y, self.char, self.foreground, self.background)
+    def draw(self, offset_x, offset_y, screen):
+        if self.graph.visible_state_grid[self.y, self.x] == 1 and \
+        self.x >= screen.x + offset_x and self.x < screen.x + screen.width + offset_x and self.y >= screen.y + offset_y and self.y < screen.y + screen.height + offset_y:
+            screen.put_char(self.x - offset_x, self.y - offset_y, self.char, self.foreground, self.background)
         
     def update(self, keyboard_controller):
         pass
@@ -54,10 +56,12 @@ class Character():
     
     def attack(self, character):
         character.health -= self.base_damage
-        print('%s dealed %d damage to %s.' %(self.name, self.base_damage, character.name))
+        self.message_bar.add_message('%s dealed %d damage to %s.' %(self.name, self.base_damage, character.name), 'orange')
         if character.health <= 0:
             character.killed()
-            print('%s is killed.' %character.name)
+            self.message_bar.add_message('%s is killed.' %character.name, 'red')
+            swap_indx = self.graph.character_list.index(character)
+            self.graph.character_list[0], self.graph.character_list[swap_indx] = self.graph.character_list[swap_indx], self.graph.character_list[0]
             
     def killed(self):
         self.char = '%'
@@ -74,8 +78,8 @@ class Character():
             self.y = position[1]
     
 class Player(Character):
-    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, is_blocked=True):
-        super(Player, self).__init__(x, y, char, foreground, background, graph, name, sight, health, is_blocked)
+    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked=True):
+        super(Player, self).__init__(x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked)
         self.initialization()
         
     def initialization(self):
@@ -85,7 +89,7 @@ class Player(Character):
         self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
         raycasting_sight(self.graph, self.get_pos(), self.sight)
     
-    def update(self, keyboard_controller, screen):
+    def update(self, keyboard_controller):
         self.target = None
         if self.health > 0:
             self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
@@ -168,8 +172,8 @@ class Player(Character):
             self.graph.cost_grid[self.y, self.x] = self.graph.tile_grid[self.y, self.x]['cost']
         
 class Enemy(Character):
-    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, is_blocked=True):
-        super(Enemy, self).__init__(x, y, char, foreground, background, graph, name, sight, health, is_blocked)
+    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked=True):
+        super(Enemy, self).__init__(x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked)
         self.initialization()
         
     def initialization(self):
@@ -180,7 +184,7 @@ class Enemy(Character):
         self.base_damage = 1
         self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
         
-    def update(self, keyboard_controller, screen):
+    def update(self, keyboard_controller):
         if self.health > 0:
             self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
             
@@ -242,8 +246,8 @@ class Enemy(Character):
             return [self.get_pos()]
                 
 class NPC(Character):
-    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, is_blocked=True):
-        super(NPC, self).__init__(x, y, char, foreground, background, graph, name, sight, health, is_blocked)
+    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked=True):
+        super(NPC, self).__init__(x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked)
         self.initialization()
     
     def initialization(self):
@@ -253,7 +257,7 @@ class NPC(Character):
         self.base_damage = 1
         self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
         
-    def update(self, keyboard_controller, screen):
+    def update(self, keyboard_controller):
         if self.health > 0:
             self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
             
@@ -268,5 +272,5 @@ class NPC(Character):
                 self.graph.cost_grid[self.y, self.x] = float('inf')
     
     def interact(self):
-        print('%s said: Hello, traveler!' %(self.name))
+        self.message_bar.add_message('%s said: Hello, traveler!' %(self.name), 'wheat')
                 
