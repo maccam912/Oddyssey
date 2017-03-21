@@ -54,10 +54,11 @@ class Character():
     
     def attack(self, character):
         character.health -= self.base_damage
+        print('%s dealed %d damage to %s.' %(self.name, self.base_damage, character.name))
         if character.health <= 0:
             character.killed()
-        print('%s dealed %d damage to %s' %(self.name, self.base_damage, character.name))
-        
+            print('%s is killed.' %character.name)
+            
     def killed(self):
         self.char = '%'
         self.foreground = 'red'
@@ -173,6 +174,7 @@ class Enemy(Character):
         
     def initialization(self):
         self.move_cost = 0
+        self.last_saw_position = None
         self.target = None
         self.player_path = None
         self.base_damage = 1
@@ -187,8 +189,14 @@ class Enemy(Character):
                 self.graph.cost_grid[self.y, self.x] = self.graph.tile_grid[self.y, self.x]['cost']
             # Action
             if self.tracking_criteria_in_sight():
+                # Tracking the player
                 self.player_path = self.get_player_path()
                 self.stategy_chase_player_to_death(self.player_path)
+            elif self.last_saw_position != None:
+                # Track to the last saw position
+                self.player_path = self.get_last_saw_path()
+                self.stategy_chase_player_to_death(self.player_path)
+                
             # Blocked moved position
             if self.is_blocked:
                 self.graph.cost_grid[self.y, self.x] = float('inf')
@@ -200,7 +208,9 @@ class Enemy(Character):
                 if character.health > 0:                    
                     line_of_sight = bresenhams_line_algorithm(self.get_pos(), character.get_pos())
                     break
-        if line_of_sight != None:        
+        if line_of_sight != None:    
+            if len(line_of_sight) > self.sight + 1:
+                return False
             for node in line_of_sight:
                 if self.graph.block_vision_grid[node[1], node[0]]:
                     return False
@@ -216,13 +226,20 @@ class Enemy(Character):
         for character in self.graph.character_list:
             if character.__class__.__name__ == 'Player':
                 if character.health > 0:
-                    player_pos = character.get_pos()
+                    self.last_saw_position = character.get_pos()
                     if character.is_blocked:
-                        self.graph.cost_grid[player_pos[1], player_pos[0]] = self.graph.tile_grid[player_pos[1], player_pos[0]]['cost']
-                    path = self.path_finding(player_pos)
+                        self.graph.cost_grid[self.last_saw_position[1], self.last_saw_position[0]] = self.graph.tile_grid[self.last_saw_position[1], self.last_saw_position[0]]['cost']
+                    path = self.path_finding(self.last_saw_position)
                     return path[1:]
                 else:
                     return [self.get_pos()]
+    
+    def get_last_saw_path(self):
+        path = self.path_finding(self.last_saw_position)
+        if len(path) > 1:
+            return path[1:]
+        else:
+            return [self.get_pos()]
                 
 class NPC(Character):
     def __init__(self, x, y, char, foreground, background, graph, name, sight, health, is_blocked=True):
