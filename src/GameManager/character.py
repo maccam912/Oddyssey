@@ -3,7 +3,7 @@ from GameManager.algorithm.path_finding import a_star_algorithm
 from GameManager.algorithm.visibility import raycasting_sight, bresenhams_line_algorithm
 
 class Character():
-    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked=True):
+    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, is_blocked=True):
         self.x = x
         self.y = y
         self.char = char
@@ -13,10 +13,10 @@ class Character():
         self.name = name
         self.sight = sight
         self.health = health
-        self.message_bar = message_bar
         self.is_blocked = is_blocked
     
     def initialization(self):
+        self.current_health = self.health
         self.move_cost = 0
         self.target = None
         self.base_damage = 1
@@ -38,7 +38,7 @@ class Character():
         self.x >= screen.x + offset_x and self.x < screen.x + screen.width + offset_x and self.y >= screen.y + offset_y and self.y < screen.y + screen.height + offset_y:
             screen.put_char(self.x - offset_x, self.y - offset_y, self.char, self.foreground, self.background)
         
-    def update(self, keyboard_controller):
+    def update(self, keyboard_controller, message_screen):
         pass
     
     def is_grid_movable(self, graph, position):
@@ -49,17 +49,18 @@ class Character():
     
     def check_character_list(self, position, character_type, character_list):
         for character in character_list:
-            if position == character.get_pos() and character.__class__.__name__ == character_type and character.health > 0:
+            if position == character.get_pos() and character.__class__.__name__ == character_type and character.current_health > 0:
                 self.target = character
                 return True
         return False
     
-    def attack(self, character):
-        character.health -= self.base_damage
-        self.message_bar.add_message('%s dealed %d damage to %s.' %(self.name, self.base_damage, character.name), 'orange')
-        if character.health <= 0:
+    def attack(self, character, message_screen):
+        character.current_health -= self.base_damage
+        message_screen.add_message('%s dealed %d damage to %s.' %(self.name, self.base_damage, character.name), 'orange')
+        if character.current_health <= 0:
+            character.current_health = 0
             character.killed()
-            self.message_bar.add_message('%s is killed.' %character.name, 'red')
+            message_screen.add_message('%s is killed.' %character.name, 'red')
             swap_indx = self.graph.character_list.index(character)
             self.graph.character_list[0], self.graph.character_list[swap_indx] = self.graph.character_list[swap_indx], self.graph.character_list[0]
             
@@ -78,27 +79,21 @@ class Character():
             self.y = position[1]
     
 class Player(Character):
-    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked=True):
-        super(Player, self).__init__(x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked)
+    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, is_blocked=True):
+        super(Player, self).__init__(x, y, char, foreground, background, graph, name, sight, health, is_blocked)
         self.initialization()
-        
-    def initialization(self):
-        self.move_cost = 0
-        self.target = None
-        self.base_damage = 1
-        self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
         raycasting_sight(self.graph, self.get_pos(), self.sight)
     
-    def update(self, keyboard_controller):
+    def update(self, keyboard_controller, message_screen):
         self.target = None
-        if self.health > 0:
+        if self.current_health > 0:
             self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
             # Nnbocked current position
             if self.is_blocked:
                 self.graph.cost_grid[self.y, self.x] = self.graph.tile_grid[self.y, self.x]['cost']
         
             # Keyboard event
-            self.update_keyboard(keyboard_controller)
+            self.update_keyboard(keyboard_controller, message_screen)
             # Mouse event
             raycasting_sight(self.graph, self.get_pos(), self.sight)
         
@@ -106,65 +101,37 @@ class Player(Character):
             if self.is_blocked:
                 self.graph.cost_grid[self.y, self.x] = float('inf')
         
-    def update_keyboard(self, keyboard_controller):
+    def update_keyboard(self, keyboard_controller, message_screen):
         if keyboard_controller.pressed != None:
             if self.graph.border == 'fixed':
                 if keyboard_controller.pressed[pygame.K_w] and self.y > 0:
-                    if self.check_character_list((self.x, self.y - 1), 'Enemy', self.graph.character_list):
-                        self.attack(self.target)
-                    elif self.check_character_list((self.x, self.y - 1), 'NPC', self.graph.character_list):
-                        self.target.interact()
-                    elif self.is_grid_movable(self.graph, (self.x, self.y - 1)):
-                        self.move((self.x, self.y - 1))
+                    self.keyboard_unit_controller((self.x, self.y - 1), message_screen)
                 if keyboard_controller.pressed[pygame.K_x] and self.y < self.graph.height - 1:
-                    if self.check_character_list((self.x, self.y + 1), 'Enemy', self.graph.character_list):
-                        self.attack(self.target)
-                    elif self.check_character_list((self.x, self.y + 1), 'NPC', self.graph.character_list):
-                        self.target.interact()
-                    elif self.is_grid_movable(self.graph, (self.x, self.y + 1)):
-                        self.move((self.x, self.y + 1))
+                    self.keyboard_unit_controller((self.x, self.y + 1), message_screen)
                 if keyboard_controller.pressed[pygame.K_a] and self.x > 0:
-                    if self.check_character_list((self.x - 1, self.y), 'Enemy', self.graph.character_list):
-                        self.attack(self.target)
-                    elif self.check_character_list((self.x - 1, self.y), 'NPC', self.graph.character_list):
-                        self.target.interact()
-                    elif self.is_grid_movable(self.graph, (self.x - 1, self.y)):
-                        self.move((self.x - 1, self.y))
+                    self.keyboard_unit_controller((self.x - 1, self.y), message_screen)
                 if keyboard_controller.pressed[pygame.K_d] and self.x < self.graph.width - 1:
-                    if self.check_character_list((self.x + 1, self.y), 'Enemy', self.graph.character_list):
-                        self.attack(self.target)
-                    elif self.check_character_list((self.x + 1, self.y), 'NPC', self.graph.character_list):
-                        self.target.interact()
-                    elif self.is_grid_movable(self.graph, (self.x + 1, self.y)):
-                        self.move((self.x + 1, self.y))
+                    self.keyboard_unit_controller((self.x + 1, self.y), message_screen)
                 if keyboard_controller.pressed[pygame.K_q] and self.y > 0 and self.x > 0:
-                    if self.check_character_list((self.x - 1, self.y - 1), 'Enemy', self.graph.character_list):
-                        self.attack(self.target)
-                    elif self.check_character_list((self.x - 1, self.y - 1), 'NPC', self.graph.character_list):
-                        self.target.interact()
-                    elif self.is_grid_movable(self.graph, (self.x - 1, self.y - 1)):
-                        self.move((self.x - 1, self.y - 1))
+                    self.keyboard_unit_controller((self.x - 1, self.y - 1), message_screen)
                 if keyboard_controller.pressed[pygame.K_e] and self.x < self.graph.width - 1 and self.y > 0:
-                    if self.check_character_list((self.x + 1, self.y - 1), 'Enemy', self.graph.character_list):
-                        self.attack(self.target)
-                    elif self.check_character_list((self.x + 1, self.y - 1), 'NPC', self.graph.character_list):
-                        self.target.interact()
-                    elif self.is_grid_movable(self.graph, (self.x + 1, self.y - 1)):
-                        self.move((self.x + 1, self.y - 1))
+                    self.keyboard_unit_controller((self.x + 1, self.y - 1), message_screen)
                 if keyboard_controller.pressed[pygame.K_c] and self.y < self.graph.height - 1 and self.x < self.graph.width - 1:
-                    if self.check_character_list((self.x + 1, self.y + 1), 'Enemy', self.graph.character_list):
-                        self.attack(self.target)
-                    elif self.check_character_list((self.x + 1, self.y + 1), 'NPC', self.graph.character_list):
-                        self.target.interact()
-                    elif self.is_grid_movable(self.graph, (self.x + 1, self.y + 1)):
-                        self.move((self.x + 1, self.y + 1))
+                    self.keyboard_unit_controller((self.x + 1, self.y + 1), message_screen)
                 if keyboard_controller.pressed[pygame.K_z] and self.x > 0 and self.y < self.graph.height - 1:
-                    if self.check_character_list((self.x - 1, self.y + 1), 'Enemy', self.graph.character_list):
-                        self.attack(self.target)
-                    elif self.check_character_list((self.x - 1, self.y + 1), 'NPC', self.graph.character_list):
-                        self.target.interact()
-                    elif self.is_grid_movable(self.graph, (self.x - 1, self.y + 1)):
-                        self.move((self.x - 1, self.y + 1))
+                    self.keyboard_unit_controller((self.x - 1, self.y + 1), message_screen)
+    
+    def keyboard_unit_controller(self, to_position, message_screen):
+        if self.check_character_list(to_position, 'Enemy', self.graph.character_list):
+            # Attack
+            self.attack(self.target, message_screen)
+        elif self.check_character_list(to_position, 'NPC', self.graph.character_list):
+            # Interact
+            self.target.interact(message_screen)
+        elif self.is_grid_movable(self.graph, to_position):
+            # Move
+            self.move(to_position)
+    
     def killed(self):
         self.char = '/_face'
         self.foreground = 'red'
@@ -172,11 +139,12 @@ class Player(Character):
             self.graph.cost_grid[self.y, self.x] = self.graph.tile_grid[self.y, self.x]['cost']
         
 class Enemy(Character):
-    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked=True):
-        super(Enemy, self).__init__(x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked)
+    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, is_blocked=True):
+        super(Enemy, self).__init__(x, y, char, foreground, background, graph, name, sight, health, is_blocked)
         self.initialization()
         
     def initialization(self):
+        self.current_health = self.health
         self.move_cost = 0
         self.last_saw_position = None
         self.target = None
@@ -184,8 +152,8 @@ class Enemy(Character):
         self.base_damage = 1
         self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
         
-    def update(self, keyboard_controller):
-        if self.health > 0:
+    def update(self, keyboard_controller, message_screen):
+        if self.current_health > 0:
             self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
             
             # Nnbocked current position
@@ -195,11 +163,11 @@ class Enemy(Character):
             if self.tracking_criteria_in_sight():
                 # Tracking the player
                 self.player_path = self.get_player_path()
-                self.stategy_chase_player_to_death(self.player_path)
+                self.stategy_chase_player_to_death(self.player_path, message_screen)
             elif self.last_saw_position != None:
                 # Track to the last saw position
                 self.player_path = self.get_last_saw_path()
-                self.stategy_chase_player_to_death(self.player_path)
+                self.stategy_chase_player_to_death(self.player_path, message_screen)
                 
             # Blocked moved position
             if self.is_blocked:
@@ -209,7 +177,7 @@ class Enemy(Character):
         line_of_sight = None
         for character in self.graph.character_list:
             if character.__class__.__name__ == 'Player':
-                if character.health > 0:                    
+                if character.current_health > 0:                    
                     line_of_sight = bresenhams_line_algorithm(self.get_pos(), character.get_pos())
                     break
         if line_of_sight != None:    
@@ -220,16 +188,16 @@ class Enemy(Character):
                     return False
         return True                
     
-    def stategy_chase_player_to_death(self, path):                    
+    def stategy_chase_player_to_death(self, path, message_screen):                    
         if self.check_character_list(path[0], 'Player', self.graph.character_list):
-            self.attack(self.target)
+            self.attack(self.target, message_screen)
         elif self.is_grid_movable(self.graph, path[0]):
             self.move((path[0][0], path[0][1]))
     
     def get_player_path(self):
         for character in self.graph.character_list:
             if character.__class__.__name__ == 'Player':
-                if character.health > 0:
+                if character.current_health > 0:
                     self.last_saw_position = character.get_pos()
                     if character.is_blocked:
                         self.graph.cost_grid[self.last_saw_position[1], self.last_saw_position[0]] = self.graph.tile_grid[self.last_saw_position[1], self.last_saw_position[0]]['cost']
@@ -246,19 +214,12 @@ class Enemy(Character):
             return [self.get_pos()]
                 
 class NPC(Character):
-    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked=True):
-        super(NPC, self).__init__(x, y, char, foreground, background, graph, name, sight, health, message_bar, is_blocked)
+    def __init__(self, x, y, char, foreground, background, graph, name, sight, health, is_blocked=True):
+        super(NPC, self).__init__(x, y, char, foreground, background, graph, name, sight, health, is_blocked)
         self.initialization()
-    
-    def initialization(self):
-        self.move_cost = 0
-        self.target = None
-        self.player_path = None
-        self.base_damage = 1
-        self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
         
-    def update(self, keyboard_controller):
-        if self.health > 0:
+    def update(self, keyboard_controller, message_screen):
+        if self.current_health > 0:
             self.background = self.graph.tile_grid[self.y, self.x]['cell']['foreground']
             
             # Nnbocked current position
@@ -271,6 +232,6 @@ class NPC(Character):
             if self.is_blocked:
                 self.graph.cost_grid[self.y, self.x] = float('inf')
     
-    def interact(self):
-        self.message_bar.add_message('%s said: Hello, traveler!' %(self.name), 'wheat')
+    def interact(self, message_screen):
+        message_screen.add_message('%s said: Hello, traveler!' %(self.name), 'wheat')
                 

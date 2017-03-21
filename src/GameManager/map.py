@@ -1,8 +1,8 @@
 import numpy as np
 
 tiles = {
-        'concrete_floor' : {'cell': {'char' : '/solid', 'foreground' : 'gray', 'background' : 'transparent'},    'cost' : 1              ,'block_vision' : False},
-        'concrete_wall'  : {'cell': {'char' : '/brick', 'foreground' : 'darkgray', 'background' : 'dimgray'},    'cost' : float('inf')   ,'block_vision' : True}
+        'concrete_floor' : {'cell': {'char' : '/solid', 'foreground' : 'slategray', 'background' : 'transparent'},    'cost' : 1              ,'block_vision' : False},
+        'concrete_wall'  : {'cell': {'char' : '/brick', 'foreground' : 'darkslategray', 'background' : 'darkgray'},    'cost' : float('inf')   ,'block_vision' : True}
         }
 
 class Map():
@@ -96,7 +96,7 @@ class Map():
                     elif self.visible_state_grid[j + offset_y, i + offset_x] == 2:
                         # State: explored
                         section[j, i] = self.cell_grid[j + offset_y, i + offset_x].copy()
-                        section[j, i]['foreground'] = 'lightgray'
+                        section[j, i]['foreground'] = 'gray'
                         section[j, i]['background'] = 'transparent'
                     else:
                         raise ValueError('Error: No matching state.')

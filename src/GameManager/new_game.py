@@ -1,7 +1,7 @@
 import numpy as np
 import pygame
 from GameManager.gui.menu import Menu
-from GameManager.gui.subscreen import SubScreen, MessageBar
+from GameManager.gui.subscreen import SubScreen, MessageScreen, PlayerInfoScreen
 from GameManager.map import Map
 from GameManager.character import Player, Enemy, NPC
 
@@ -35,35 +35,30 @@ class NewGame():
         self.menu = Menu(self.curses, self.mouse_controller, self.keyboard_controller, int(self.curses.win_width/2 - self.menu_size[0]/2), int(self.curses.win_height/2 - self.menu_size[1]/2), self.menu_size[0], self.menu_size[1], \
                          self.select_dict, align='mid', flick_enable=False, indicator_enable=False, mouse_enable=True)
         
-        # Draw UI
-        
-        message_bar_height = int(np.ceil(self.curses.win_height / 10))
-        self.main_screen = SubScreen(0, 0, self.curses.win_width, self.curses.win_height - message_bar_height - 1, self.curses)
-        self.info_screen = SubScreen(0, self.curses.win_height - message_bar_height - 1, self.curses.win_width, 1, self.curses)
-        self.message_screen = SubScreen(0, self.curses.win_height - message_bar_height, self.curses.win_width, message_bar_height, self.curses)
-        self.message_bar = MessageBar(self.message_screen)
-        
-        self.info_screen.fill_char(char='/solid', foreground='teal', background='transparent')
-        
         # Initialize game
         self.map = Map(0, 0, 'unexplored', 'fixed', '../assets/data/level/playground.grid', [])
-                
-        # Set control flag
-        self.is_init = True
-        self.enable = True
-        self.timer_enable = True
         
         # Game object initialization
-        self.player = Player(2, 2, '/face', 'wheat', 'transparent', self.map, 'Hero', 15, 20, self.message_bar)
-        self.enemy0 = Enemy(21, 8, 'g', 'green', 'transparent', self.map, 'goblin', 15, 6, self.message_bar)
-        self.enemy1 = Enemy(40, 8, 'g', 'green', 'transparent', self.map, 'goblin', 15, 6, self.message_bar)
-        self.npc = NPC(13, 24, '/face', 'peru', 'transparent', self.map, 'farmer', 15, 10, self.message_bar)
+        self.player = Player(2, 2, '/face', 'wheat', 'transparent', self.map, 'Hero', 15, 20)
+        self.enemy0 = Enemy(21, 8, 'g', 'green', 'transparent', self.map, 'goblin', 15, 6)
+        self.enemy1 = Enemy(40, 8, 'g', 'green', 'transparent', self.map, 'goblin', 15, 6)
+        self.npc = NPC(13, 24, '/face', 'peru', 'transparent', self.map, 'farmer', 15, 10)
         
         self.map.character_list.append(self.enemy0)
         self.map.character_list.append(self.enemy1)
         self.map.character_list.append(self.npc)
         self.map.character_list.append(self.player)
         
+        # Set control flag
+        self.is_init = True
+        self.enable = True
+        self.timer_enable = True
+        
+        # Draw UI
+        message_bar_height = int(np.ceil(self.curses.win_height / 10))
+        self.main_screen = SubScreen(0, 0, self.curses.win_width, self.curses.win_height - message_bar_height - 1, self.curses)
+        self.info_screen = PlayerInfoScreen(0, self.curses.win_height - message_bar_height - 1, self.curses.win_width, 1, self.curses, self.player)
+        self.message_screen = MessageScreen(0, self.curses.win_height - message_bar_height, self.curses.win_width, message_bar_height, self.curses)
     
     def update(self, event):
         if self.is_realtime:
@@ -87,7 +82,7 @@ class NewGame():
             
         if self.character_update:
             for character in self.map.character_list:
-                character.update(self.keyboard_controller)
+                character.update(self.keyboard_controller, self.message_screen)
             self.character_update = False
         
         # Display
@@ -96,7 +91,6 @@ class NewGame():
             
             # Camera control
             (offset_x , offset_y) = self.player.x - int(self.main_screen.width/2), self.player.y - int(self.main_screen.height/2)
-#            (offset_x , offset_y) = 0, 0
             
             sec = self.map.get_cell_section(offset_x, offset_y, self.main_screen.width, self.main_screen.height)
             self.curses.set_cell_section(self.main_screen.x, self.main_screen.y, sec)
@@ -109,8 +103,9 @@ class NewGame():
             message = '%04d' %self.timer
             self.main_screen.put_message(3, 0 , message[-4:], foreground='white', background='transparent', auto=True, align='right')
             
-            # Draw message bar
-            self.message_bar.draw()
+            # Draw message and info screen
+            self.message_screen.draw()
+            self.info_screen.draw()
         
         # Menu control
         if self.menu_enable:
