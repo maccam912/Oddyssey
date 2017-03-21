@@ -2,7 +2,7 @@ import pygame
 from GameManager.menu import Menu
 from GameManager.subscreen import SubScreen
 from GameManager.map import Map
-from GameManager.character import Player
+from GameManager.character import Player, Enemy, NPC
 
 
 class NewGame():
@@ -18,6 +18,7 @@ class NewGame():
         self.is_init = False
         self.enable = False
         self.timer_enable = False
+        self.character_update = False
     
     def start(self):
         # Initial setting
@@ -48,7 +49,7 @@ class NewGame():
         self.toolbar.fill_char('/solid', 'wheat', 'transparent')
         
         # Initialize game
-        self.map = Map(0, 0, 'unexplored', 'fixed', '../assets/data/level/level_0.grid')
+        self.map = Map(0, 0, 'unexplored', 'fixed', '../assets/data/level/level_0.grid', [])
                 
         # Set control flag
         self.is_init = True
@@ -56,33 +57,19 @@ class NewGame():
         self.timer_enable = True
         
         # Game object initialization
-        self.player = Player(2, 2, '/face', 'yellow', 'transparent', 15)
-        self.goal = [25, 15]
+        self.player = Player(2, 2, '/face', 'wheat', 'transparent', self.map, 'Hero', 15, 20)
+        self.enemy = Enemy(21, 8, 'g', 'green', 'transparent', self.map, 'goblin', 15, 10)
+        self.npc = NPC(13, 24, '/face', 'peru', 'transparent', self.map, 'farmer', 15, 10)
+        
+        self.map.character_list.append(self.enemy)
+        self.map.character_list.append(self.npc)
+        self.map.character_list.append(self.player)
+        
     
     def update(self, event):
-        # Gameloop
-        if self.timer_enable:
-            # Draw grass tiles
-            sec = self.map.get_cell_section(0, 0, self.subscreen.width, self.subscreen.height)
-            self.curses.set_cell_section(0, 0, sec)
-            
-            self.player.draw(self.subscreen)
-            self.subscreen.put_char(self.goal[0], self.goal[1], '/_face', 'yellow', 'transparent')
-            
-#            self.player.path_finding(self.map, self.goal, self.subscreen, True)
-            
-            # Draw counter
-            if self.is_realtime: 
+        if self.is_realtime:
                 self.timer += 1
-            message = '%04d' %self.timer
-            self.subscreen.put_message(3, 0 , message[-4:], foreground='white', background='transparent', auto=True, align='right')
-
-        # Keyboard events
-        if self.timer_enable:
-            if self.keyboard_controller.pressed != None and not self.is_realtime:
-                self.timer += 1
-            self.player.update(self.keyboard_controller, self.map)
-        
+                
         if self.keyboard_controller.pressed != None:
             # Menu enable
             if self.keyboard_controller.pressed[pygame.K_ESCAPE]:
@@ -90,9 +77,32 @@ class NewGame():
             # Timer control
             if self.keyboard_controller.pressed[pygame.K_SPACE]:
                 if not self.menu_enable:
-                    self.timer_enable = not self.timer_enable                
-                self.key_block = False
-                
+                    self.timer_enable = not self.timer_enable
+        
+        # Keyboard events
+        if self.timer_enable:
+            if self.keyboard_controller.pressed != None and not self.is_realtime and not self.keyboard_controller.pressed[pygame.K_SPACE]:
+                self.timer += 1
+                self.character_update = True
+            
+        if self.character_update:
+            for character in self.map.character_list:
+                character.update(self.keyboard_controller, self.subscreen)
+            self.character_update = False
+        
+        # Display
+        if self.timer_enable:
+            # Draw grass tiles
+            sec = self.map.get_cell_section(0, 0, self.subscreen.width, self.subscreen.height)
+            self.curses.set_cell_section(0, 0, sec)
+            
+            for character in self.map.character_list:
+                character.draw(self.subscreen)
+            
+            # Draw counter            
+            message = '%04d' %self.timer
+            self.subscreen.put_message(3, 0 , message[-4:], foreground='white', background='transparent', auto=True, align='right')
+        
         # Menu control
         if self.menu_enable:
             self.timer_enable = False

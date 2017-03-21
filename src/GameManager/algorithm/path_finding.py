@@ -25,7 +25,6 @@ def heuristic(a, b):
 def a_star_algorithm(graph, start, goal):
     start = tuple(start)
     goal = tuple(goal)
-    
     frontier = PriorityQueue()
     frontier.put(start, 0)
     came_from = {}
@@ -59,6 +58,6 @@ def reconstruct_path(came_from, start, goal):
     while current != start:
         current = came_from[current]
         path.append(current)
-    path.append(start) # optional
+#    path.append(start) # optional
     path.reverse() # optional
     return path

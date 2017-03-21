@@ -72,7 +72,8 @@ def raycasting_sight(graph, position, sight):
                         graph.visible_state_grid[y + 1, x] = 1
                     if graph.block_vision_grid[y - 1, x]:
                         graph.visible_state_grid[y - 1, x] = 1
-                        
+    # Origin as visible
+    graph.visible_state_grid[position[1], position[0]] = 1
 
 def bresenhams_line_algorithm(start, end):
     line = []

@@ -1,17 +1,18 @@
 import numpy as np
 
 tiles = {
-        'grass' : {'cell': {'char' : '.', 'foreground' : 'green', 'background' : 'palegreen'},          'cost' : 1              ,'block_vision' : False},
-        'wall'  : {'cell': {'char' : '/brick', 'foreground' : 'darkgray', 'background' : 'dimgray'},    'cost' : float('inf')   ,'block_vision' : True}
+        'concrete_floor' : {'cell': {'char' : '/solid', 'foreground' : 'gray', 'background' : 'transparent'},    'cost' : 1              ,'block_vision' : False},
+        'concrete_wall'  : {'cell': {'char' : '/brick', 'foreground' : 'darkgray', 'background' : 'dimgray'},    'cost' : float('inf')   ,'block_vision' : True}
         }
 
 class Map():
-    def __init__(self, width, height, init_state='unexplored', border='fixed', file_path=None):
+    def __init__(self, width, height, init_state='unexplored', border='fixed', file_path=None, character_list=[]):
         self.width = width
         self.height = height
         self.init_state = init_state
         self.border = border
         self.file_path = file_path
+        self.character_list = character_list
         self.initialization()
         
     def initialization(self):
@@ -94,7 +95,7 @@ class Map():
                 elif self.visible_state_grid[j, i] == 2:
                     # State: explored
                     section[j, i] = self.cell_grid[j, i].copy()
-                    section[j, i]['foreground'] = 'gray'
+                    section[j, i]['foreground'] = 'lightgray'
                     section[j, i]['background'] = 'transparent'
                 else:
                     raise ValueError('Error: No matching state.')
