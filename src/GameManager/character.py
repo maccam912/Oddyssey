@@ -56,7 +56,7 @@ class Character():
     
     def attack(self, character, message_screen):
         character.current_health -= self.base_damage
-        message_screen.add_message('%s dealed %d damage to %s.' %(self.name, self.base_damage, character.name), 'orange')
+        message_screen.add_message('%s dealt %d damage to %s.' %(self.name, self.base_damage, character.name), 'orange')
         if character.current_health <= 0:
             character.current_health = 0
             character.killed()

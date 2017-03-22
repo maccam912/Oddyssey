@@ -1,8 +1,8 @@
-import heapq
-
 # http://theory.stanford.edu/~amitp/GameProgramming/
 # https://en.wikipedia.org/wiki/A*_search_algorithm
 # https://www.youtube.com/watch?v=KNXfSOx4eEE
+
+import heapq
 
 class PriorityQueue:
     def __init__(self):

@@ -1,6 +1,6 @@
 # Oddyssey
 
-The project is an open world roguelike game using [PYGUSES](https://github.com/KodeWorker/PYGUSES)
+The project is an open world roguelike game using [PYGUSES](https://github.com/KodeWorker/PYGUSES). The goal is to create a vivid procedually-generated open-world environment for player to interact. And the world keep on simulation while the game progresses.
 
 ## Getting Started
 
@@ -55,3 +55,4 @@ This project is licensed under the MIT License - see the [license.md](license.md
 * This project is inspired by [Doryen](http://roguecentral.org/doryen/)'s work on [libtcod](https://bitbucket.org/libtcod/libtcod).
 * Thanks to **Billie Thompson** - [PurpleBooth](https://github.com/PurpleBooth) for her document templates.
 * Thanks to [Dwarf Fortress](http://www.bay12games.com/dwarves/) and [Cataclysm: Dark Days Ahead](http://en.cataclysmdda.com/) for hundreds of happy hours.
+* Amit's [Red Blob Games](http://www.redblobgames.com/) provides details on many procedual-generation algorithms.
