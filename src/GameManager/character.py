@@ -27,7 +27,7 @@ class Character():
         if path != None and is_shown:
             for node in path:
                 if node != tuple(self.get_pos()) and node != tuple(goal):
-                    screen.put_char(node[0], node[1], '/solid', 'aqua', 'transparent')
+                    screen.put_char(node[0], node[1], '█', 'aqua', 'transparent')
         return path
     
     def get_pos(self):
@@ -133,7 +133,7 @@ class Player(Character):
             self.move(to_position)
     
     def killed(self):
-        self.char = '/_face'
+        self.char = '☻'
         self.foreground = 'red'
         if self.is_blocked:
             self.graph.cost_grid[self.y, self.x] = self.graph.tile_grid[self.y, self.x]['cost']

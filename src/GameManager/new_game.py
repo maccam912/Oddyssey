@@ -39,10 +39,10 @@ class NewGame():
         self.map = Map(0, 0, 'unexplored', 'fixed', '../assets/data/level/playground.grid', [])
         
         # Game object initialization
-        self.player = Player(2, 2, '/face', 'wheat', 'transparent', self.map, 'Hero', 15, 20)
+        self.player = Player(2, 2, '☺', 'wheat', 'transparent', self.map, 'Hero', 15, 20)
         self.enemy0 = Enemy(21, 8, 'g', 'green', 'transparent', self.map, 'goblin', 15, 6)
         self.enemy1 = Enemy(40, 8, 'g', 'green', 'transparent', self.map, 'goblin', 15, 6)
-        self.npc = NPC(13, 24, '/face', 'peru', 'transparent', self.map, 'farmer', 15, 10)
+        self.npc = NPC(13, 24, '☺', 'peru', 'transparent', self.map, 'farmer', 15, 10)
         
         self.map.character_list.append(self.enemy0)
         self.map.character_list.append(self.enemy1)
@@ -129,7 +129,7 @@ class NewGame():
         # Draw timer state
         message = 'PULSED'
         if self.timer_enable:
-            self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, '/solid'*len(message), foreground='transparent', background='transparent', auto=True, align='right')
+            self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, '█'*len(message), foreground='transparent', background='transparent', auto=True, align='right')
         else:
             self.curses.put_message(self.curses.win_width-2, self.curses.win_height-1, message, foreground='white', background='transparent', auto=True, align='right')
 

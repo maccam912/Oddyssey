@@ -64,18 +64,22 @@ class PlayerInfoScreen(SubScreen):
     
     def draw(self):
         # Draw background
-        self.fill_char(char='/solid', foreground='peru', background='transparent')
+        self.fill_char(char='█', foreground='peru', background='transparent')
         # Draw HP bar
         health = self.player.current_health
         interval = self.player.health / self.full_health_bar_length / 3
         level = int(np.ceil(health / interval))
         
         health_title = 'HP '
+        
         if level % 3 == 0:
             remainder = ''
-        else:
-            remainder = '/l%d' % (level % 3)
-        health_message = '/solid' * int((level - level%3)/3) + remainder
+        elif level % 3 == 1:
+            remainder = '░'
+        elif level % 3 == 2: 
+            remainder = '▒'
+            
+        health_message = '█' * int((level - level%3)/3) + remainder
         self.put_message(0, 0, health_title, foreground='red', background='peru', auto=True, align='left')
         self.put_message(len(health_title), 0, ' '*self.full_health_bar_length, foreground='red', background='transparent', auto=True, align='left')
         self.put_message(len(health_title), 0, health_message, foreground='red', background='transparent', auto=True, align='left')

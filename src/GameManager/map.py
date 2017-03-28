@@ -1,8 +1,8 @@
 import numpy as np
 
 tiles = {
-        'concrete_floor' : {'cell': {'char' : '/solid', 'foreground' : 'slategray', 'background' : 'transparent'},    'cost' : 1              ,'block_vision' : False},
-        'concrete_wall'  : {'cell': {'char' : '/brick', 'foreground' : 'darkslategray', 'background' : 'darkgray'},    'cost' : float('inf')   ,'block_vision' : True}
+        'concrete_floor' : {'cell': {'char' : '█', 'foreground' : 'slategray', 'background' : 'transparent'},    'cost' : 1              ,'block_vision' : False},
+        'concrete_wall'  : {'cell': {'char' : '■', 'foreground' : 'darkslategray', 'background' : 'darkgray'},    'cost' : float('inf')   ,'block_vision' : True}
         }
 
 class Map():
@@ -89,7 +89,7 @@ class Map():
                 if i + offset_x >= 0 and i + offset_x < self.visible_state_grid.shape[1] and j + offset_y >= 0 and j + offset_y < self.visible_state_grid.shape[0]:
                     if self.visible_state_grid[j + offset_y, i + offset_x] == 0:
                         # State: unexplored
-                        section[j, i] = {'char' : '/l1', 'foreground' : 'gray', 'background': 'transparent'}
+                        section[j, i] = {'char' : '░', 'foreground' : 'gray', 'background': 'transparent'}
                     elif self.visible_state_grid[j + offset_y, i + offset_x] == 1:
                         # State: visible                    
                         section[j, i] = self.cell_grid[j + offset_y, i + offset_x].copy()

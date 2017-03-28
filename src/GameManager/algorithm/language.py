@@ -54,7 +54,7 @@ vowel_orthography_set = {'Default' :        {'A': 'á', 'E': 'é', 'I': 'í', 'O
                          'Doubles' :        {'A': 'aa', 'E': 'ee', 'I': 'ii', 'O': 'oo', 'U': 'uu'}
                          }
 
-consonant_orthography_set = {'Default' :            {'ʃ': 'sh', 'ʒ': 'zh', 'ʧ': 'ch', 'ʤ': 'j', 'ŋ': 'ng', 'j': 'y', 'x': 'kh', 'ɣ': 'gh', 'ʔ': '`',},
+consonant_orthography_set = {'Default' :            {'ʃ': 'sh', 'ʒ': 'zh', 'ʧ': 'ch', 'ʤ': 'j', 'ŋ': 'ng', 'j': 'y', 'x': 'kh', 'ɣ': 'gh', 'ʔ': '‘',},
                              'Slavic' :             {'ʃ': 'š', 'ʒ': 'ž', 'ʧ': 'č', 'ʤ': 'ǧ', 'j': 'j'},
                              'German' :             {'ʃ': 'sch', 'ʒ': 'zh', 'ʧ': 'tsch', 'ʤ': 'dz', 'j': 'j', 'x': 'ch'},
                              'French' :             {'ʃ': 'ch', 'ʒ': 'j', 'ʧ': 'tch', 'ʤ': 'dj', 'x': 'kh'},
@@ -177,6 +177,7 @@ def generate_name_from_morpheme_pool(generic_morpheme_pool, meaningful_morpheme_
             else:
                 word = ( random.choice(list(meaningful_morpheme_pool)) + random.choice(list(generic_morpheme_pool)))
                 name += word[0].upper() + word[1:] + ' '
+            
     return name[:-1]
 
 if __name__ == '__main__':    
@@ -200,9 +201,11 @@ if __name__ == '__main__':
                       'consonant_orthography_type' :    consonant_orthography_type,
                       'vowel_orthography_type' :        vowel_orthography_type}
     
-    generic_morpheme_pool = geneate_morpheme_pool(language_style, pool_size=10, min_syllable=1, max_syllable=1)
+    generic_morpheme_pool = geneate_morpheme_pool(language_style, pool_size=20, min_syllable=1, max_syllable=1)
     city_morpheme_pool = geneate_morpheme_pool(language_style, pool_size=3, min_syllable=1, max_syllable=1)
     connection_morpheme_pool = geneate_morpheme_pool(language_style, pool_size=2, min_syllable=1, max_syllable=1)
-    
-    name = generate_name_from_morpheme_pool(generic_morpheme_pool, city_morpheme_pool, connection_morpheme_pool, min_word=1, max_word=3)
-    print(name)
+    print(language_style)
+    print('---')    
+    for _ in range(5):
+        name = generate_name_from_morpheme_pool(generic_morpheme_pool, city_morpheme_pool, connection_morpheme_pool, min_word=1, max_word=3)
+        print(name)

@@ -38,7 +38,7 @@ class Menu():
             self.mouse_controller.is_mouse_recorded = False
         self.menu_sec = self.curses.get_cell_section(self.x, self.y, self.width, self.height).copy()
         # Draw menu frame
-        Frame(self.x, self.y, self.width, self.height, self.curses, style=style, is_filled=True, char='/solid', foreground='wheat', background='transparent', frame_foreground='peru', frame_background='transparent')
+        Frame(self.x, self.y, self.width, self.height, self.curses, style=style, is_filled=True, char='█', foreground='wheat', background='transparent', frame_foreground='peru', frame_background='transparent')
         # Main Menu
         if title != None:
             self.curses.put_message(self.window_center[0], self.window_center[1] - int(self.height/2), title, foreground='transparent', background='peru', auto=True, align='mid')
@@ -74,8 +74,8 @@ class Menu():
 #            self.curses.put_char(label_x + x, label_y, char_list[x], 'brown', 'tan')
         # Draw indicator
         if self.indicator_enable:
-            self.curses.put_char(label_x -1, label_y, '/Right', 'peru', 'wheat')
-            self.curses.put_char(label_x + len(char_list), label_y, '/Left', 'peru', 'wheat')
+            self.curses.put_char(label_x -1, label_y, '▶', 'peru', 'wheat')
+            self.curses.put_char(label_x + len(char_list), label_y, '◀', 'peru', 'wheat')
     
     def update(self):
         # Keyboard and mouse
@@ -178,7 +178,7 @@ class MainMenu(Menu):
         # Draw background
         self.draw_background()
         # Selection info.
-        Hline(0, self.curses.win_width-1, self.curses.win_height-1, self.curses, char='/solid', foreground='peru', background='wheat')
+        Hline(0, self.curses.win_width-1, self.curses.win_height-1, self.curses, char='█', foreground='peru', background='wheat')
         message = '</up/w>: move up, </down/x>: move down, <s/Enter>: select, <ESC>: quit'
         self.curses.put_message(self.curses.win_width-1, self.curses.win_height-1, message, foreground='transparent', background='peru', auto=True, align='right')
     
