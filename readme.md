@@ -16,8 +16,9 @@ These instructions will get you a copy of the project up and running on your loc
 ### Installing
 
 ```
-git clone https://github.com/KodeWorker/Oddyssey.git
-git clone https://github.com/KodeWorker/PYGUSES.git ./Oddyssey/src/PYGUSES
+git clone --recursive https://github.com/KodeWorker/Oddyssey.git
+cd Oddyssey
+pip install -r requirements.txt
 ```
 
 ## Running the Game
@@ -29,7 +30,8 @@ Oddyssey source code is in /src/GameManager. The PYGUSES module is in /src/PYGUS
 Run the main python script.
 
 ```
-python /src/main.py
+cd src
+python /main.py
 ```
 
 ## Contributing

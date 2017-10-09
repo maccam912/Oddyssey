@@ -1,0 +1,3 @@
+[submodule "src/PYGUSES"]
+	path = src/PYGUSES
+	url = https://github.com/KodeWorker/PYGUSES
